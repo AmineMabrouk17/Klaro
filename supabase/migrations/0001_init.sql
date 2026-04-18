@@ -11,7 +11,6 @@ create table public.profiles (
   id uuid references auth.users(id) on delete cascade primary key,
   full_name text not null,
   date_of_birth date,
-  age integer generated always as (extract(year from age(date_of_birth))::int) stored,
   occupation text,
   occupation_category text check (
     occupation_category in (

@@ -1,22 +1,118 @@
 import { Router } from 'express';
-import { scoreComputeRequestSchema } from '@klaro/shared';
 import { requireAuth } from '../middleware/auth';
-import { validate } from '../middleware/validate';
+import { supabaseAdmin, supabaseForUser } from '../services/supabase';
+import { MLError } from '../services/ml.client';
+import { computeAndPersistScore } from '../services/score.service';
+import { logger } from '../lib/logger';
 
 export const scoreRouter = Router();
 
 scoreRouter.use(requireAuth);
 
-scoreRouter.get('/current', (req, res) => {
-  // TODO: select latest credit_scores row for req.user!.id
-  res.json({ userId: req.user!.id, score: null });
+const RATE_LIMIT_MS = 60 * 60 * 1000;
+
+scoreRouter.post('/calculate', async (req, res) => {
+  const userId = req.user!.id;
+
+  // Rate limit: check the last credit_scores row created_at instead of in-memory map
+  // so the limit survives server restarts.
+  const { data: lastScore } = await supabaseAdmin
+    .from('credit_scores')
+    .select('created_at')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (lastScore) {
+    const elapsed = Date.now() - new Date(lastScore.created_at).getTime();
+    if (elapsed < RATE_LIMIT_MS) {
+      return res.status(429).json({
+        error: 'Score can only be recalculated once per hour',
+        retryAfter: Math.ceil((RATE_LIMIT_MS - elapsed) / 1000),
+      });
+    }
+  }
+
+  const sb = supabaseForUser(req.user!.accessToken);
+
+  // Guard: KYC must be verified
+  const { data: profile } = await sb
+    .from('profiles')
+    .select('kyc_status')
+    .eq('id', userId)
+    .single();
+
+  if (profile?.kyc_status !== 'verified') {
+    return res.status(403).json({
+      error: 'KYC verification is required before generating a Klaro credit score',
+    });
+  }
+
+  // Guard: must have at least one bank connection
+  const { data: connections } = await sb
+    .from('bank_connections')
+    .select('id')
+    .eq('user_id', userId)
+    .limit(1);
+
+  if (!connections?.length) {
+    return res.status(422).json({
+      error: 'Connect a bank account or upload bank statements before scoring',
+      suggestions: [
+        'Connect via Attijari, BIAT, STB, or BNA online banking',
+        'Upload your last 3 months of bank statements as PDF',
+      ],
+    });
+  }
+
+  try {
+    const result = await computeAndPersistScore(userId);
+    return res.json(result);
+  } catch (err) {
+    if (err instanceof MLError) {
+      // Forward INSUFFICIENT_DATA 422 from ML service directly to client
+      if (err.statusCode === 422) {
+        try {
+          return res.status(422).json(JSON.parse(err.body));
+        } catch {
+          return res.status(422).json({ error: err.body });
+        }
+      }
+    }
+    logger.error({ err, userId }, 'score calculation failed');
+    return res.status(500).json({ error: 'Score calculation failed. Please try again.' });
+  }
 });
 
-scoreRouter.get('/history', (req, res) => {
-  res.json({ userId: req.user!.id, history: [] });
+scoreRouter.get('/current', async (req, res) => {
+  const { data, error } = await supabaseAdmin
+    .from('credit_scores')
+    .select('*')
+    .eq('user_id', req.user!.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    return res.status(500).json({ error: 'Failed to fetch score' });
+  }
+  if (!data) {
+    return res.status(404).json({ reason: 'no_score_yet' });
+  }
+  return res.json(data);
 });
 
-scoreRouter.post('/compute', validate(scoreComputeRequestSchema), (_req, res) => {
-  // TODO: gather features -> ML /score -> persist credit_scores row
-  res.status(202).json({ accepted: true });
+scoreRouter.get('/history', async (req, res) => {
+  const { data, error } = await supabaseAdmin
+    .from('credit_scores')
+    .select('score, score_band, confidence, created_at')
+    .eq('user_id', req.user!.id)
+    .order('created_at', { ascending: false })
+    .limit(12);
+
+  if (error) {
+    return res.status(500).json({ error: 'Failed to fetch score history' });
+  }
+  return res.json(data ?? []);
 });

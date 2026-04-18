@@ -11,6 +11,7 @@ dependencies = [
     "pydantic-settings>=2.7.0",
     "numpy>=1.26.4",
     "anthropic>=0.42.0",
+    "supabase>=2.0.0",
     "httpx>=0.28.1",
     "python-multipart>=0.0.20",
 ]

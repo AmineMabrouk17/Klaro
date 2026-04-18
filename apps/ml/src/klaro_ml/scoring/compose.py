@@ -23,10 +23,14 @@ def _band(score: int) -> str:
     return "POOR"
 
 
-def compose_score(features: dict[str, Any]) -> dict[str, Any]:
-    rule = compute_rule_score(features)
-    anomaly = detect_anomalies(features)
-    llm = llm_score(features)
+def compose_score(user_data: dict[str, Any]) -> dict[str, Any]:
+    """Blend the three scoring layers into a final 0–1000 score.
+
+    Weights: 35% rule layer + 65% LLM layer − 150-point anomaly penalty.
+    """
+    rule = compute_rule_score(user_data)
+    anomaly = detect_anomalies(user_data)
+    llm = llm_score(user_data)
 
     rule_score = float(rule["weighted"]) * 1000
     llm_value = float(llm["score"])
@@ -38,6 +42,8 @@ def compose_score(features: dict[str, Any]) -> dict[str, Any]:
     return {
         "score": final_int,
         "band": _band(final_int),
+        "risk_category": llm.get("risk_category", "medium"),
+        "confidence": float(llm.get("confidence", 0.5)),
         "breakdown": {
             "rule_layer": round(rule_score),
             "llm_layer": round(llm_value),
@@ -46,7 +52,7 @@ def compose_score(features: dict[str, Any]) -> dict[str, Any]:
             **llm.get("breakdown", {}),
         },
         "flags": list({*anomaly.get("top_signals", []), *llm.get("anomaly_flags", [])}),
-        "recommendations": llm.get("coaching_tips", []),
-        "confidence": float(llm.get("confidence", 0.5)),
+        "explanation": llm.get("explanation", ""),
+        "coaching_tips": llm.get("coaching_tips", []),
         "model_version": MODEL_VERSION,
     }

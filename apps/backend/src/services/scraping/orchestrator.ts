@@ -3,6 +3,7 @@ import { AttijariAdapter } from './adapters/attijari';
 import { StbAdapter } from './adapters/stb';
 import { BiatAdapter } from './adapters/biat';
 import { logger } from '../../lib/logger';
+import { computeAndPersistScore } from '../score.service';
 
 const REGISTRY: Record<string, () => BankAdapter> = {
   attijari: () => new AttijariAdapter(),
@@ -36,6 +37,12 @@ export async function runScrape(
       adapter.extractBalances(),
     ]);
     log.info({ tx: tx.length, balances: balances.length }, 'scrape complete');
+
+    // Auto-trigger score recalculation after successful sync (non-blocking)
+    computeAndPersistScore(userId).catch((err) =>
+      log.warn({ err }, 'auto-score after bank sync failed'),
+    );
+
     return { transactions: tx.length, balances: balances.length };
   } finally {
     await adapter.logout().catch((e) => log.warn({ err: e }, 'logout failed'));

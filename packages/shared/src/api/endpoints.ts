@@ -21,7 +21,7 @@ export const API_ENDPOINTS = {
   score: {
     current: '/api/score/current',
     history: '/api/score/history',
-    compute: '/api/score/compute',
+    calculate: '/api/score/calculate',
   },
 
   chat: {
