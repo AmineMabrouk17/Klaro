@@ -1,0 +1,20 @@
+
+> @klaro/frontend@0.1.0 lint /Users/macbook/Documents/GitHub/Klaro/apps/frontend
+> next lint --max-warnings 0
+
+`next lint` is deprecated and will be removed in Next.js 16.
+For new projects, use create-next-app to choose your preferred linter.
+For existing projects, migrate to the ESLint CLI:
+npx @next/codemod@canary next-lint-to-eslint-cli .
+
+Failed to load plugin 'react' declared in '.eslintrc.cjs » @klaro/eslint-config/next » eslint-config-next/core-web-vitals » /Users/macbook/Documents/GitHub/Klaro/node_modules/.pnpm/eslint-config-next@15.5.15_eslint@8.57.1_typescript@5.9.3/node_modules/eslint-config-next/index.js': Cannot find module 'resolve'
+Require stack:
+- /Users/macbook/Documents/GitHub/Klaro/node_modules/.pnpm/eslint-plugin-react@7.37.5_eslint@8.57.1/node_modules/eslint-plugin-react/lib/util/version.js
+- /Users/macbook/Documents/GitHub/Klaro/node_modules/.pnpm/eslint-plugin-react@7.37.5_eslint@8.57.1/node_modules/eslint-plugin-react/lib/util/propTypes.js
+- /Users/macbook/Documents/GitHub/Klaro/node_modules/.pnpm/eslint-plugin-react@7.37.5_eslint@8.57.1/node_modules/eslint-plugin-react/lib/util/Components.js
+- /Users/macbook/Documents/GitHub/Klaro/node_modules/.pnpm/eslint-plugin-react@7.37.5_eslint@8.57.1/node_modules/eslint-plugin-react/lib/rules/boolean-prop-naming.js
+- /Users/macbook/Documents/GitHub/Klaro/node_modules/.pnpm/eslint-plugin-react@7.37.5_eslint@8.57.1/node_modules/eslint-plugin-react/lib/rules/index.js
+- /Users/macbook/Documents/GitHub/Klaro/node_modules/.pnpm/eslint-plugin-react@7.37.5_eslint@8.57.1/node_modules/eslint-plugin-react/index.js
+- /Users/macbook/Documents/GitHub/Klaro/node_modules/.pnpm/@eslint+eslintrc@2.1.4/node_modules/@eslint/eslintrc/dist/eslintrc.cjs
+Referenced from: /Users/macbook/Documents/GitHub/Klaro/node_modules/.pnpm/eslint-config-next@15.5.15_eslint@8.57.1_typescript@5.9.3/node_modules/eslint-config-next/index.js
+ ELIFECYCLE  Command failed with exit code 1.

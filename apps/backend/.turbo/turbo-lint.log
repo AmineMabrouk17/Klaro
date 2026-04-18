@@ -1,0 +1,4 @@
+
+> @klaro/backend@0.1.0 lint /Users/macbook/Documents/GitHub/Klaro/apps/backend
+> eslint . --max-warnings 0
+

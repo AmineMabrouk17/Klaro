@@ -1,0 +1,4 @@
+
+> @klaro/ui@0.0.0 lint /Users/macbook/Documents/GitHub/Klaro/packages/ui
+> eslint . --max-warnings 0
+

@@ -1,0 +1,4 @@
+
+> @klaro/shared@0.0.0 lint /Users/macbook/Documents/GitHub/Klaro/packages/shared
+> eslint . --max-warnings 0
+

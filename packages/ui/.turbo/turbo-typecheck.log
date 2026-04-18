@@ -1,0 +1,4 @@
+
+> @klaro/ui@0.0.0 typecheck /Users/macbook/Documents/GitHub/Klaro/packages/ui
+> tsc --noEmit
+

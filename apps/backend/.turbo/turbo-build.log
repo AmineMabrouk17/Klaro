@@ -1,0 +1,4 @@
+
+> @klaro/backend@0.1.0 build /Users/macbook/Documents/GitHub/Klaro/apps/backend
+> tsup src/index.ts --format esm --clean --target node20
+

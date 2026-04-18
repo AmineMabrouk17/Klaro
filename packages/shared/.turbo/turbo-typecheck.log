@@ -1,0 +1,4 @@
+
+> @klaro/shared@0.0.0 typecheck /Users/macbook/Documents/GitHub/Klaro/packages/shared
+> tsc --noEmit
+
