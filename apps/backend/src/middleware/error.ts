@@ -1,6 +1,6 @@
 import type { ErrorRequestHandler } from 'express';
 import { ZodError } from 'zod';
-import { logger } from '@/lib/logger';
+import { logger } from '../lib/logger';
 
 export class HttpError extends Error {
   public readonly status: number;

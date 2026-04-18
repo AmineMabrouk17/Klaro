@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { type AITask, getModelForTask } from '@klaro/shared';
-import { env } from '@/config/env';
+import { env } from '../config/env';
 
 let _client: Anthropic | null = null;
 

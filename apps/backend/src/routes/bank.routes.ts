@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { bankConsentUpdateSchema } from '@klaro/shared';
-import { requireAuth, requireRole } from '@/middleware/auth';
-import { validate } from '@/middleware/validate';
+import { requireAuth, requireRole } from '../middleware/auth';
+import { validate } from '../middleware/validate';
 
 export const bankRouter = Router();
 

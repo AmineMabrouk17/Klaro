@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { chatHistoryQuerySchema, chatSendRequestSchema } from '@klaro/shared';
-import { requireAuth } from '@/middleware/auth';
-import { validate } from '@/middleware/validate';
+import { requireAuth } from '../middleware/auth';
+import { validate } from '../middleware/validate';
 
 export const chatRouter = Router();
 

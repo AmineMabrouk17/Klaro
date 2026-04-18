@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { transactionListQuerySchema } from '@klaro/shared';
-import { requireAuth } from '@/middleware/auth';
-import { validate } from '@/middleware/validate';
+import { requireAuth } from '../middleware/auth';
+import { validate } from '../middleware/validate';
 
 export const transactionsRouter = Router();
 

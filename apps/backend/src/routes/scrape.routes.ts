@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import { bankConnectionStartSchema } from '@klaro/shared';
-import { requireAuth } from '@/middleware/auth';
-import { validate } from '@/middleware/validate';
-import { scrapeLimiter } from '@/middleware/rate-limit';
-import { isBankSupported } from '@/services/scraping/orchestrator';
-import { HttpError } from '@/middleware/error';
+import { requireAuth } from '../middleware/auth';
+import { validate } from '../middleware/validate';
+import { scrapeLimiter } from '../middleware/rate-limit';
+import { isBankSupported } from '../services/scraping/orchestrator';
+import { HttpError } from '../middleware/error';
 
 export const scrapeRouter = Router();
 

@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { supabaseAdmin } from '@/services/supabase';
+import { supabaseAdmin } from '../services/supabase';
 
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   const header = req.headers.authorization;

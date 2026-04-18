@@ -3,19 +3,19 @@ import cors from 'cors';
 import helmet from 'helmet';
 import pinoHttp from 'pino-http';
 
-import { env } from '@/config/env';
-import { logger } from '@/lib/logger';
-import { errorHandler } from '@/middleware/error';
-import { generalLimiter } from '@/middleware/rate-limit';
+import { env } from './config/env';
+import { logger } from './lib/logger';
+import { errorHandler } from './middleware/error';
+import { generalLimiter } from './middleware/rate-limit';
 
-import { authRouter } from '@/routes/auth.routes';
-import { kycRouter } from '@/routes/kyc.routes';
-import { scrapeRouter } from '@/routes/scrape.routes';
-import { scoreRouter } from '@/routes/score.routes';
-import { chatRouter } from '@/routes/chat.routes';
-import { documentsRouter } from '@/routes/documents.routes';
-import { bankRouter } from '@/routes/bank.routes';
-import { transactionsRouter } from '@/routes/transactions.routes';
+import { authRouter } from './routes/auth.routes';
+import { kycRouter } from './routes/kyc.routes';
+import { scrapeRouter } from './routes/scrape.routes';
+import { scoreRouter } from './routes/score.routes';
+import { chatRouter } from './routes/chat.routes';
+import { documentsRouter } from './routes/documents.routes';
+import { bankRouter } from './routes/bank.routes';
+import { transactionsRouter } from './routes/transactions.routes';
 
 export function createApp(): Express {
   const app = express();

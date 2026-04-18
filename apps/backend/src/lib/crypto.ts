@@ -1,5 +1,5 @@
 import { createPrivateKey, privateDecrypt, constants } from 'node:crypto';
-import { env } from '@/config/env';
+import { env } from '../config/env';
 
 /**
  * Decrypt an RSA-OAEP envelope produced by the browser using

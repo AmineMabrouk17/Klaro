@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@klaro/shared';
-import { env } from '@/config/env';
+import { env } from '../config/env';
 
 /**
  * Service-role Supabase client. Bypasses RLS — never expose to the browser.

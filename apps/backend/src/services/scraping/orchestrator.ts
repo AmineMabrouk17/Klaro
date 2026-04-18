@@ -2,7 +2,7 @@ import type { BankAdapter, BankCredentials } from './adapters/base';
 import { AttijariAdapter } from './adapters/attijari';
 import { StbAdapter } from './adapters/stb';
 import { BiatAdapter } from './adapters/biat';
-import { logger } from '@/lib/logger';
+import { logger } from '../../lib/logger';
 
 const REGISTRY: Record<string, () => BankAdapter> = {
   attijari: () => new AttijariAdapter(),
