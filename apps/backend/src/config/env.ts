@@ -1,18 +1,27 @@
+import { config } from 'dotenv';
 import { z } from 'zod';
 
-const schema = z.object({
+config();
+
+const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  PORT: z.coerce.number().default(4000),
-  SUPABASE_URL: z.string().url(),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(20),
-  CORS_ORIGINS: z.string().default('http://localhost:3000'),
-  ML_BASE_URL: z.string().url().default('http://127.0.0.1:8000'),
-  ANTHROPIC_API_KEY: z.string().optional(),
+  PORT: z.coerce.number().int().min(1).max(65535).default(4000),
+  LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
+  CORS_ORIGINS: z
+    .string()
+    .default('http://localhost:3000')
+    .transform((s) => s.split(',').map((x) => x.trim()).filter(Boolean)),
+
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(10),
+
+  ANTHROPIC_API_KEY: z.string().min(10).optional(),
+  ML_BASE_URL: z.string().url().default('http://localhost:8000'),
+
+  CREDENTIAL_ENCRYPTION_PUBLIC_KEY: z.string().optional(),
   CREDENTIAL_ENCRYPTION_PRIVATE_KEY: z.string().optional(),
 });
 
-export const env = schema.parse(process.env);
+export const env = envSchema.parse(process.env);
 
-export function corsOriginList(): string[] {
-  return env.CORS_ORIGINS.split(',').map((s) => s.trim());
-}
+export type Env = z.infer<typeof envSchema>;

@@ -11,9 +11,9 @@ This document supersedes the React Native sections of `internal_docs/06_Updated_
 ```mermaid
 flowchart LR
   Browser["Browser"]
-  Browser --> Web["Next.js apps/web"]
+  Browser --> Web["Next.js apps/frontend"]
   Web -->|"@supabase/ssr (auth + cookies)"| Supa["Supabase: Auth, Postgres, Storage, Realtime"]
-  Web -->|"HTTPS + JWT"| Api["Express API apps/api"]
+  Web -->|"HTTPS + JWT"| Api["Express apps/backend"]
   Api --> Supa
   Api -->|"HTTP"| Ml["FastAPI ML apps/ml"]
   Api -->|"Anthropic API"| Claude["Claude Haiku / Sonnet"]
@@ -29,19 +29,19 @@ Three deployable services, one shared schema, one shared TypeScript contract pac
 ## 2. Monorepo layout
 
 ```
-apps/web        Next.js 15 (App Router, RSC, Tailwind, shadcn-style UI)
-apps/api        Express 4 + TypeScript (auth, scoring, scraping orchestration, chat proxy)
+apps/frontend   Next.js 15 (App Router, RSC, Tailwind, shadcn-style UI)
+apps/backend    Express 4 + TypeScript (auth, scoring, scraping orchestration, chat proxy)
 apps/ml         FastAPI 3.11 (KYC, OCR, 3-layer scoring)
 packages/shared TS types, Zod schemas, API endpoints, API client, AI model map
 packages/ui     Shared UI helpers
 packages/eslint-config + tsconfig  Shared toolchain presets
 supabase/       Migrations, RLS policies, storage buckets
-infra/docker/   Dockerfiles for api, web, ml, scraper
+infra/docker/   Dockerfiles for backend, frontend, ml, scraper
 ```
 
 ---
 
-## 3. Web app (apps/web)
+## 3. Frontend (apps/frontend)
 
 Stack: Next.js 15 App Router, React 19, TypeScript, Tailwind v3, shadcn-style components, TanStack Query, Zustand (client UI state only), `@supabase/ssr` for auth, Recharts for visualizations, `react-hook-form` + Zod for forms.
 
@@ -88,7 +88,7 @@ sequenceDiagram
 
 ---
 
-## 4. API (apps/api)
+## 4. Backend (apps/backend)
 
 Express 4 + TypeScript, ESM. Middleware order:
 
@@ -145,7 +145,7 @@ RLS is enabled on every user-owned table. The Express API uses the service-role 
 
 ## 7. AI model routing
 
-The model map lives in `packages/shared/src/constants/ai-models.ts` and is mirrored in `apps/ml/src/klaro_ml/settings.py` so both web/api and ml stay in sync.
+The model map lives in `packages/shared/src/constants/ai-models.ts` and is mirrored in `apps/ml/src/klaro_ml/settings.py` so both frontend/backend and ml stay in sync.
 
 | Task                       | Model                          | Why                            |
 | -------------------------- | ------------------------------ | ------------------------------ |

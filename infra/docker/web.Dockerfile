@@ -8,20 +8,20 @@ FROM base AS deps
 WORKDIR /repo
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json ./
 COPY packages ./packages
-COPY apps/web/package.json apps/web/
-RUN pnpm install --frozen-lockfile --filter @klaro/web...
+COPY apps/frontend/package.json apps/frontend/
+RUN pnpm install --frozen-lockfile --filter @klaro/frontend...
 
 FROM deps AS build
 WORKDIR /repo
-COPY apps/web ./apps/web
-RUN pnpm --filter @klaro/web build
+COPY apps/frontend ./apps/frontend
+RUN pnpm --filter @klaro/frontend build
 
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=build /repo/apps/web/.next ./.next
-COPY --from=build /repo/apps/web/public ./public
-COPY --from=build /repo/apps/web/package.json ./package.json
+COPY --from=build /repo/apps/frontend/.next ./.next
+COPY --from=build /repo/apps/frontend/public ./public
+COPY --from=build /repo/apps/frontend/package.json ./package.json
 COPY --from=build /repo/node_modules ./node_modules
 EXPOSE 3000
 USER node

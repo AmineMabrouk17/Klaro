@@ -1,12 +1,12 @@
 # Local dev orchestration. Supabase runs separately via `supabase start`.
-# Use this to spin up the API + ML sidecar without polluting your local Node setup.
+# Use this to spin up the backend + ML sidecar without polluting your local Node setup.
 
 services:
-  api:
+  backend:
     build:
       context: .
       dockerfile: infra/docker/api.Dockerfile
-    container_name: klaro-api
+    container_name: klaro-backend
     ports:
       - "4000:4000"
     env_file:

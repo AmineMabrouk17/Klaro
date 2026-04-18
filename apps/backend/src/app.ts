@@ -42,7 +42,7 @@ export function createApp(): Express {
   app.use(generalLimiter);
 
   app.get('/health', (_req, res) => {
-    res.json({ status: 'ok', service: 'klaro-api', uptime: process.uptime() });
+    res.json({ status: 'ok', service: 'klaro-backend', uptime: process.uptime() });
   });
 
   app.use('/api/auth', authRouter);

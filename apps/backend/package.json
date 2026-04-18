@@ -1,5 +1,5 @@
 {
-  "name": "@klaro/api",
+  "name": "@klaro/backend",
   "version": "0.1.0",
   "private": true,
   "type": "module",

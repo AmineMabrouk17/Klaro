@@ -21,7 +21,7 @@ importers:
         specifier: ^5.6.3
         version: 5.9.3
 
-  apps/api:
+  apps/backend:
     dependencies:
       '@anthropic-ai/sdk':
         specifier: ^0.32.1
@@ -219,133 +219,6 @@ importers:
         version: 5.9.3
 
   apps/ml: {}
-
-  apps/web:
-    dependencies:
-      '@hookform/resolvers':
-        specifier: ^3.9.1
-        version: 3.10.0(react-hook-form@7.72.1(react@19.2.5))
-      '@klaro/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
-      '@klaro/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
-      '@radix-ui/react-avatar':
-        specifier: ^1.1.2
-        version: 1.1.11(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      '@radix-ui/react-dialog':
-        specifier: ^1.1.4
-        version: 1.1.15(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      '@radix-ui/react-dropdown-menu':
-        specifier: ^2.1.4
-        version: 2.1.16(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      '@radix-ui/react-label':
-        specifier: ^2.1.1
-        version: 2.1.8(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      '@radix-ui/react-progress':
-        specifier: ^1.1.1
-        version: 1.1.8(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      '@radix-ui/react-separator':
-        specifier: ^1.1.1
-        version: 1.1.8(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      '@radix-ui/react-slot':
-        specifier: ^1.1.1
-        version: 1.2.4(@types/react@19.2.14)(react@19.2.5)
-      '@radix-ui/react-tabs':
-        specifier: ^1.1.2
-        version: 1.1.13(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      '@radix-ui/react-toast':
-        specifier: ^1.2.4
-        version: 1.2.15(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      '@supabase/ssr':
-        specifier: ^0.5.2
-        version: 0.5.2(@supabase/supabase-js@2.103.3)
-      '@supabase/supabase-js':
-        specifier: ^2.47.10
-        version: 2.103.3
-      '@tanstack/react-query':
-        specifier: ^5.62.7
-        version: 5.99.1(react@19.2.5)
-      class-variance-authority:
-        specifier: ^0.7.1
-        version: 0.7.1
-      clsx:
-        specifier: ^2.1.1
-        version: 2.1.1
-      lucide-react:
-        specifier: ^0.468.0
-        version: 0.468.0(react@19.2.5)
-      next:
-        specifier: ^15.1.2
-        version: 15.5.15(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      next-themes:
-        specifier: ^0.4.4
-        version: 0.4.6(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      react:
-        specifier: ^19.0.0
-        version: 19.2.5
-      react-dom:
-        specifier: ^19.0.0
-        version: 19.2.5(react@19.2.5)
-      react-hook-form:
-        specifier: ^7.54.1
-        version: 7.72.1(react@19.2.5)
-      recharts:
-        specifier: ^2.15.0
-        version: 2.15.4(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      sonner:
-        specifier: ^1.7.1
-        version: 1.7.4(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      tailwind-merge:
-        specifier: ^2.5.5
-        version: 2.6.1
-      tailwindcss-animate:
-        specifier: ^1.0.7
-        version: 1.0.7(tailwindcss@3.4.19(tsx@4.21.0))
-      zod:
-        specifier: ^3.23.8
-        version: 3.25.76
-      zustand:
-        specifier: ^5.0.2
-        version: 5.0.12(@types/react@19.2.14)(react@19.2.5)(use-sync-external-store@1.6.0(react@19.2.5))
-    devDependencies:
-      '@klaro/eslint-config':
-        specifier: workspace:*
-        version: link:../../packages/eslint-config
-      '@klaro/tsconfig':
-        specifier: workspace:*
-        version: link:../../packages/tsconfig
-      '@types/node':
-        specifier: ^20.14.10
-        version: 20.19.39
-      '@types/react':
-        specifier: ^19.0.1
-        version: 19.2.14
-      '@types/react-dom':
-        specifier: ^19.0.2
-        version: 19.2.3(@types/react@19.2.14)
-      autoprefixer:
-        specifier: ^10.4.20
-        version: 10.5.0(postcss@8.5.10)
-      eslint:
-        specifier: ^8.57.1
-        version: 8.57.1
-      eslint-config-next:
-        specifier: ^15.1.2
-        version: 15.5.15(eslint@8.57.1)(typescript@5.9.3)
-      postcss:
-        specifier: ^8.4.49
-        version: 8.5.10
-      prettier-plugin-tailwindcss:
-        specifier: ^0.6.9
-        version: 0.6.14(prettier@3.8.3)
-      tailwindcss:
-        specifier: ^3.4.17
-        version: 3.4.19(tsx@4.21.0)
-      typescript:
-        specifier: ^5.6.3
-        version: 5.9.3
 
   packages/eslint-config:
     dependencies:
@@ -5981,7 +5854,7 @@ snapshots:
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.10
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.58.2(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1))(eslint@8.57.1)
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.58.2(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.58.2(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.58.2(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
       eslint-plugin-jsx-a11y: 6.10.2(eslint@8.57.1)
       eslint-plugin-react: 7.37.5(eslint@8.57.1)
       eslint-plugin-react-hooks: 5.2.0(eslint@8.57.1)
@@ -6021,7 +5894,7 @@ snapshots:
       tinyglobby: 0.2.16
       unrs-resolver: 1.11.1
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.58.2(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.58.2(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.58.2(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -6036,7 +5909,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.58.2(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.58.2(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.58.2(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9

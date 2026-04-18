@@ -10,9 +10,9 @@ RUN corepack enable && corepack prepare pnpm@9.12.3 --activate
 WORKDIR /worker
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json ./
 COPY packages ./packages
-COPY apps/api ./apps/api
+COPY apps/backend ./apps/backend
 
-RUN pnpm install --frozen-lockfile --filter @klaro/api...
+RUN pnpm install --frozen-lockfile --filter @klaro/backend...
 
 USER pwuser
-CMD ["pnpm", "--filter", "@klaro/api", "exec", "tsx", "src/services/scraping/orchestrator.ts"]
+CMD ["pnpm", "--filter", "@klaro/backend", "exec", "tsx", "src/services/scraping/orchestrator.ts"]

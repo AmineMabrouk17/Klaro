@@ -3,7 +3,7 @@ import { env } from '@/config/env';
 
 export const logger = pino({
   level: env.LOG_LEVEL,
-  base: { service: 'klaro-api' },
+  base: { service: 'klaro-backend' },
   redact: {
     paths: [
       'req.headers.authorization',

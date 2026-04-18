@@ -5,7 +5,7 @@ import { logger } from '@/lib/logger';
 const app = createApp();
 
 const server = app.listen(env.PORT, () => {
-  logger.info({ port: env.PORT, env: env.NODE_ENV }, 'klaro-api listening');
+  logger.info({ port: env.PORT, env: env.NODE_ENV }, 'klaro-backend listening');
 });
 
 function shutdown(signal: string) {

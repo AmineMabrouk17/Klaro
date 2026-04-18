@@ -5,7 +5,7 @@ import { env } from '@/config/env';
  * Decrypt an RSA-OAEP envelope produced by the browser using
  * CREDENTIAL_ENCRYPTION_PUBLIC_KEY. The private key never leaves the API.
  *
- * Browser side (apps/web) should encrypt with WebCrypto:
+ * Browser side (apps/frontend) should encrypt with WebCrypto:
  *   crypto.subtle.encrypt(
  *     { name: 'RSA-OAEP' },
  *     publicKey,

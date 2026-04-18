@@ -2,7 +2,7 @@
   "name": "klaro",
   "version": "0.1.0",
   "private": true,
-  "description": "Klaro — alternative credit scoring platform for Tunisia (Next.js + Express + FastAPI + Supabase)",
+  "description": "Klaro — alternative credit scoring platform for Tunisia (Next.js frontend + Express backend + FastAPI ML + Supabase)",
   "license": "MIT",
   "packageManager": "pnpm@9.12.3",
   "engines": {
