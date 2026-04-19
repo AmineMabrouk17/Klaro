@@ -2,13 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { PartnerHero } from '@/components/marketing/partner-hero';
 import { Section } from '@/components/marketing/section';
-import {
-  Terminal,
-  TerminalKey,
-  TerminalNumber,
-  TerminalPrompt,
-  TerminalString,
-} from '@/components/marketing/terminal';
+import { ApiBlock } from '@/components/marketing/api-block';
 import { FadeIn } from '@/components/motion/fade-in';
 import { Stagger, StaggerItem } from '@/components/motion/stagger';
 import { CountUp } from '@/components/motion/count-up';
@@ -27,7 +21,7 @@ export default function PartnersPage() {
       <PartnerHero />
       <PartnerStats />
       <WhatYouGet />
-      <ApiBlock />
+      <ApiSection />
       <DashboardSurfaces />
       <ComplianceStrip />
       <PricingTeaser />
@@ -118,7 +112,7 @@ function WhatYouGet() {
   );
 }
 
-function ApiBlock() {
+function ApiSection() {
   return (
     <Section
       id="api"
@@ -128,117 +122,11 @@ function ApiBlock() {
       description="No SDK lock-in. No proprietary identifiers. Auth with your bank-scoped key, score with the user's Klaro ID."
       className="hairline-b"
     >
-      <div className="grid gap-6 lg:grid-cols-[1fr_1.1fr] lg:items-stretch">
-        <Stagger stagger={0.06} className="space-y-3">
-          <StaggerItem>
-            <EndpointRow
-              method="GET"
-              path="/v1/score/:user_id"
-              note="Latest score, band, and signal breakdown for a single user."
-            />
-          </StaggerItem>
-          <StaggerItem>
-            <EndpointRow
-              method="POST"
-              path="/v1/score/batch"
-              note="Bulk score up to 1,000 users in a single request."
-            />
-          </StaggerItem>
-          <StaggerItem>
-            <EndpointRow
-              method="GET"
-              path="/v1/users/:user_id/habits"
-              note="Cash-flow habits, on-time ratio, income variance, debt-to-income."
-            />
-          </StaggerItem>
-          <StaggerItem>
-            <EndpointRow
-              method="POST"
-              path="/v1/webhooks"
-              note="Register an HMAC-signed endpoint for score & KYC events."
-            />
-          </StaggerItem>
-          <StaggerItem>
-            <EndpointRow
-              method="GET"
-              path="/v1/usage"
-              note="Per-key request counts, rate-limit headroom, and audit log."
-            />
-          </StaggerItem>
-        </Stagger>
-
-        <FadeIn delay={0.1}>
-        <Terminal title="POST /v1/score/batch">
-          <TerminalPrompt>
-            curl -sX POST https://api.klaro.tn/v1/score/batch \
-          </TerminalPrompt>
-          {'\n'}
-          {'     '}-H {'"'}Authorization: Bearer $KLARO_BANK_KEY{'"'} \{'\n'}
-          {'     '}-H {'"'}Content-Type: application/json{'"'} \{'\n'}
-          {'     '}-d {'\''}{'{'} <TerminalKey>&quot;user_ids&quot;</TerminalKey>: [<TerminalString>&quot;klr_7421&quot;</TerminalString>, <TerminalString>&quot;klr_7409&quot;</TerminalString>] {'}'}{'\''}
-          {'\n'}
-          {'\n'}
-          {'{'}
-          {'\n'}
-          {'  '}<TerminalKey>&quot;results&quot;</TerminalKey>: [
-          {'\n'}
-          {'    '}{'{'}
-          {'\n'}
-          {'      '}<TerminalKey>&quot;user_id&quot;</TerminalKey>: <TerminalString>&quot;klr_7421&quot;</TerminalString>,
-          {'\n'}
-          {'      '}<TerminalKey>&quot;score&quot;</TerminalKey>: <TerminalNumber>712</TerminalNumber>,
-          {'\n'}
-          {'      '}<TerminalKey>&quot;band&quot;</TerminalKey>: <TerminalString>&quot;GOOD&quot;</TerminalString>,
-          {'\n'}
-          {'      '}<TerminalKey>&quot;habits&quot;</TerminalKey>: {'{'}
-          {'\n'}
-          {'        '}<TerminalKey>&quot;on_time_ratio&quot;</TerminalKey>: <TerminalNumber>0.94</TerminalNumber>,
-          {'\n'}
-          {'        '}<TerminalKey>&quot;cash_buffer_days&quot;</TerminalKey>: <TerminalNumber>23</TerminalNumber>,
-          {'\n'}
-          {'        '}<TerminalKey>&quot;debt_to_income&quot;</TerminalKey>: <TerminalNumber>0.31</TerminalNumber>
-          {'\n'}
-          {'      '}{'}'}
-          {'\n'}
-          {'    '}{'}'},
-          {'\n'}
-          {'    '}{'{'} <TerminalKey>&quot;user_id&quot;</TerminalKey>: <TerminalString>&quot;klr_7409&quot;</TerminalString>, <TerminalKey>&quot;score&quot;</TerminalKey>: <TerminalNumber>488</TerminalNumber>, <TerminalKey>&quot;band&quot;</TerminalKey>: <TerminalString>&quot;FAIR&quot;</TerminalString> {'}'}
-          {'\n'}
-          {'  '}]
-          {'\n'}
-          {'}'}
-        </Terminal>
-        </FadeIn>
-      </div>
+      <ApiBlock />
     </Section>
   );
 }
 
-function EndpointRow({
-  method,
-  path,
-  note,
-}: {
-  method: 'GET' | 'POST' | 'DELETE';
-  path: string;
-  note: string;
-}) {
-  return (
-    <div className="hairline rounded-xl p-4 marketing-card-hover">
-      <div className="flex items-center gap-3">
-        <span
-          className={`mono text-[10.5px] tracking-[0.16em] uppercase px-2 py-0.5 rounded ${
-            method === 'POST' ? 'bg-emerald-500/10 text-emerald-300' : 'bg-sky-500/10 text-sky-300'
-          }`}
-        >
-          {method}
-        </span>
-        <span className="mono text-[13px] text-white">{path}</span>
-      </div>
-      <p className="mt-2 text-[13px] text-white/55 leading-relaxed">{note}</p>
-    </div>
-  );
-}
 
 function DashboardSurfaces() {
   const surfaces = [
@@ -429,8 +317,8 @@ function PricingTeaser() {
     <Section
       index="04"
       eyebrow="Pricing"
-      title="Custom for the first design partners."
-      description="The first three banks we onboard pay nothing for the first 12 months. We co-design the integration; you keep the dashboard."
+      title="Transparent pricing in TND."
+      description="All plans are paid. Every plan includes a 14-day free trial — no card required to start, no lock-in on the first month."
       className="hairline-b"
     >
       <Stagger
@@ -440,16 +328,16 @@ function PricingTeaser() {
         <StaggerItem>
         <PriceCard
           tag="01"
-          title="Pilot"
-          price="Free"
-          sub="First 12 months"
+          title="Starter"
+          price="790 TND"
+          sub="Per month"
           bullets={[
-            'Up to 10k scored users',
+            'Up to 1,000 scored users/month',
             'API + partner dashboard',
-            'Direct Slack channel',
-            'Co-designed integration',
+            'Standard email support',
+            '99.5% uptime SLA',
           ]}
-          cta="Apply as design partner"
+          cta="Start 14-day trial"
           href={PARTNER_EMAIL}
           highlighted
         />
@@ -458,15 +346,16 @@ function PricingTeaser() {
         <PriceCard
           tag="02"
           title="Growth"
-          price="Custom"
-          sub="Per-decision pricing"
+          price="2,490 TND"
+          sub="Per month"
           bullets={[
-            'Unlimited scored users',
-            'Webhook events',
-            'SLA-backed uptime',
+            'Up to 5,000 scored users/month',
+            'Webhook events + real-time alerts',
+            '99.9% SLA-backed uptime',
+            'Dedicated Slack channel',
             'Quarterly model reviews',
           ]}
-          cta="Talk to us"
+          cta="Start 14-day trial"
           href={PARTNER_EMAIL}
         />
         </StaggerItem>
@@ -474,12 +363,13 @@ function PricingTeaser() {
         <PriceCard
           tag="03"
           title="Enterprise"
-          price="Annual"
-          sub="On-prem option"
+          price="Custom"
+          sub="Annual contract"
           bullets={[
+            'Unlimited scored users',
             'On-prem ML sidecar',
             'Custom signal layers',
-            'Dedicated infra',
+            'Dedicated infrastructure',
             'Compliance reporting',
           ]}
           cta="Contact sales"
@@ -512,7 +402,7 @@ function PriceCard({
 }) {
   return (
     <div
-      className={`bg-[hsl(var(--marketing-bg))] p-7 flex flex-col ${
+      className={`bg-[hsl(var(--marketing-bg))] p-7 flex flex-col h-full ${
         highlighted ? 'relative' : ''
       }`}
     >
@@ -526,7 +416,7 @@ function PriceCard({
         <span className="mono text-[10.5px] tracking-[0.18em] text-white/40">{tag}</span>
         {highlighted && (
           <span className="mono text-[10px] tracking-[0.18em] uppercase accent-text">
-            Limited
+            Popular
           </span>
         )}
       </div>
@@ -545,15 +435,17 @@ function PriceCard({
           </li>
         ))}
       </ul>
-      <a
-        href={href}
-        className={`mt-6 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-[13px] font-medium ${
-          highlighted ? 'btn-mark-primary' : 'btn-mark-ghost'
-        }`}
-      >
-        {cta}
-        <span aria-hidden>→</span>
-      </a>
+      <div className="mt-auto pt-6">
+        <a
+          href={href}
+          className={`inline-flex w-full items-center justify-center gap-2 px-4 py-2.5 text-[13px] font-medium ${
+            highlighted ? 'btn-mark-primary' : 'btn-mark-ghost'
+          }`}
+        >
+          {cta}
+          <span aria-hidden>→</span>
+        </a>
+      </div>
     </div>
   );
 }
@@ -570,7 +462,7 @@ function PartnerCTA() {
           <div className="relative grid gap-6 sm:grid-cols-[1fr_auto] sm:items-end">
             <div className="space-y-3">
               <span className="mono text-[10.5px] tracking-[0.2em] uppercase text-white/45">
-                Design partner program
+                Get started
               </span>
               <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white">
                 Underwrite the customers
@@ -578,7 +470,7 @@ function PartnerCTA() {
                 <span className="text-white/45">the bureau forgot.</span>
               </h2>
               <p className="text-[14px] text-white/55 max-w-md leading-relaxed">
-                Three slots open. Twelve months free. Your credit team, our pipeline.
+                14-day free trial on all plans. Your credit team, our pipeline.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -586,7 +478,7 @@ function PartnerCTA() {
                 href={PARTNER_EMAIL}
                 className="btn-mark-primary inline-flex items-center gap-2 px-5 py-3 text-[14px] font-medium"
               >
-                Request API access
+                Start free trial
                 <span aria-hidden>→</span>
               </a>
               <Link
