@@ -1,3 +1,5 @@
+import { getServerApi } from '@/lib/api.server';
+import { requireRole } from '@/lib/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScoreGauge } from '@/components/score/score-gauge';
 import { ScoreBreakdown } from '@/components/score/score-breakdown';
@@ -5,7 +7,6 @@ import { ScoreRadar } from '@/components/score/score-radar';
 import { RiskBadge } from '@/components/bank/risk-badge';
 import { ConsentScopeChips } from '@/components/bank/consent-scope-chips';
 import { RequestConsentButton } from '@/components/bank/request-consent-button';
-import { getServerApi } from '@/lib/api.server';
 import { API_ENDPOINTS } from '@klaro/shared';
 import type { ScoreBreakdown as ScoreBreakdownType } from '@klaro/shared';
 import { notFound } from 'next/navigation';
@@ -48,6 +49,7 @@ function mapBreakdown(raw: Record<string, unknown>): ScoreBreakdownType {
 }
 
 export default async function BankClientDetailPage({ params }: Props) {
+  await requireRole('bank');
   const { id } = await params;
   const api = await getServerApi();
 
@@ -74,7 +76,6 @@ export default async function BankClientDetailPage({ params }: Props) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
@@ -87,28 +88,28 @@ export default async function BankClientDetailPage({ params }: Props) {
             )}
           </p>
         </div>
-        {scoreData && (
-          <RiskBadge risk={scoreData.risk_category} />
-        )}
+        {scoreData && <RiskBadge risk={scoreData.risk_category} />}
       </div>
 
-      {/* Profile metadata */}
       {profile && (
         <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
           {profile.occupation_category && (
-            <span>Occupation: <span className="text-foreground capitalize">{profile.occupation_category}</span></span>
+            <span>
+              Occupation:{' '}
+              <span className="text-foreground capitalize">{profile.occupation_category}</span>
+            </span>
           )}
           <span>
             KYC:{' '}
             <span
-              className={`capitalize font-medium ${
+              className={`font-medium capitalize ${
                 profile.kyc_status === 'verified'
                   ? 'text-green-600'
                   : profile.kyc_status === 'flagged'
-                  ? 'text-orange-600'
-                  : profile.kyc_status === 'rejected'
-                  ? 'text-red-600'
-                  : 'text-yellow-600'
+                    ? 'text-orange-600'
+                    : profile.kyc_status === 'rejected'
+                      ? 'text-red-600'
+                      : 'text-yellow-600'
               }`}
             >
               {profile.kyc_status}
@@ -117,7 +118,6 @@ export default async function BankClientDetailPage({ params }: Props) {
         </div>
       )}
 
-      {/* Consent scope chips */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Consent scope</CardTitle>
@@ -128,11 +128,9 @@ export default async function BankClientDetailPage({ params }: Props) {
         </CardContent>
       </Card>
 
-      {/* Score section */}
       {scoreData && breakdown ? (
         <>
           <div className="grid gap-6 lg:grid-cols-3">
-            {/* Gauge */}
             <Card>
               <CardHeader>
                 <CardTitle>Score</CardTitle>
@@ -148,7 +146,6 @@ export default async function BankClientDetailPage({ params }: Props) {
               </CardContent>
             </Card>
 
-            {/* Bar breakdown */}
             <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle>Breakdown</CardTitle>
@@ -159,7 +156,6 @@ export default async function BankClientDetailPage({ params }: Props) {
             </Card>
           </div>
 
-          {/* Radar chart */}
           <Card>
             <CardHeader>
               <CardTitle>Radar view</CardTitle>
@@ -169,7 +165,6 @@ export default async function BankClientDetailPage({ params }: Props) {
             </CardContent>
           </Card>
 
-          {/* Anomaly flags */}
           {scoreData.flags?.length > 0 && (
             <Card>
               <CardHeader>
@@ -191,11 +186,12 @@ export default async function BankClientDetailPage({ params }: Props) {
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle>Score</CardTitle>
+            <CardTitle>No score yet</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              No score available yet. The client may not have calculated their credit score, or your consent scope does not include score access.
+              No score available yet. The client may not have calculated their credit score, or your
+              consent scope does not include score access.
             </p>
           </CardContent>
         </Card>

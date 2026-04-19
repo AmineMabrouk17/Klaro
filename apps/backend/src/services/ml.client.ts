@@ -2,15 +2,19 @@ import { env } from '../config/env';
 
 export interface MLScoreInput {
   userId: string;
-  features: Record<string, unknown>;
 }
 
 export interface MLScoreResult {
   score: number;
   band: string;
+  riskCategory: string;
+  confidence: number;
   breakdown: Record<string, number>;
   flags: string[];
-  recommendations: string[];
+  explanation: string;
+  coachingTips: string[];
+  dataSufficiency: number;
+  modelVersion: string;
 }
 
 export interface OcrExtractedFields {
@@ -65,9 +69,42 @@ async function call<T>(path: string, body?: unknown): Promise<T> {
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   if (!res.ok) {
-    throw new Error(`ML call failed (${res.status}): ${await res.text()}`);
+    const text = await res.text();
+    const err = new MLError(`ML call failed (${res.status})`, res.status, text);
+    throw err;
   }
-  return (await res.json()) as T;
+  const json = await res.json();
+  // Map snake_case ML response to camelCase
+  if (path === '/score') {
+    return mapScoreResponse(json as Record<string, unknown>) as T;
+  }
+  return json as T;
+}
+
+function mapScoreResponse(raw: Record<string, unknown>): MLScoreResult {
+  return {
+    score: raw.score as number,
+    band: raw.band as string,
+    riskCategory: raw.risk_category as string,
+    confidence: raw.confidence as number,
+    breakdown: raw.breakdown as Record<string, number>,
+    flags: (raw.flags ?? []) as string[],
+    explanation: (raw.explanation ?? '') as string,
+    coachingTips: (raw.coaching_tips ?? []) as string[],
+    dataSufficiency: (raw.data_sufficiency ?? 1) as number,
+    modelVersion: raw.model_version as string,
+  };
+}
+
+export class MLError extends Error {
+  constructor(
+    message: string,
+    public readonly statusCode: number,
+    public readonly body: string,
+  ) {
+    super(message);
+    this.name = 'MLError';
+  }
 }
 
 // ---------------------------------------------------------------------------

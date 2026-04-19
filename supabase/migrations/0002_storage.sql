@@ -1,35 +1,40 @@
 -- =============================================================================
 -- Klaro — storage buckets + policies
+-- documents: PDF/JPEG/PNG, max 10 MB
+-- selfies:   JPEG/PNG, max 5 MB
+-- bank-statements: raw scraped files, no size/MIME restriction
 -- =============================================================================
 
-insert into storage.buckets (id, name, public)
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values
-  ('kyc-docs', 'kyc-docs', false),
-  ('bank-statements', 'bank-statements', false),
-  ('selfies', 'selfies', false)
+  ('documents', 'documents', false, 10485760,
+   array['application/pdf', 'image/jpeg', 'image/png']),
+  ('selfies', 'selfies', false, 5242880,
+   array['image/jpeg', 'image/png']),
+  ('bank-statements', 'bank-statements', false, null, null)
 on conflict (id) do nothing;
 
 -- Path convention: <bucket>/<user_id>/<filename>
 -- All access scoped to the owning user.
 
-create policy "kyc-docs: owner read"
+create policy "documents: owner read"
   on storage.objects for select
   using (
-    bucket_id = 'kyc-docs'
+    bucket_id = 'documents'
     and auth.uid()::text = (storage.foldername(name))[1]
   );
 
-create policy "kyc-docs: owner insert"
+create policy "documents: owner insert"
   on storage.objects for insert
   with check (
-    bucket_id = 'kyc-docs'
+    bucket_id = 'documents'
     and auth.uid()::text = (storage.foldername(name))[1]
   );
 
-create policy "kyc-docs: owner delete"
+create policy "documents: owner delete"
   on storage.objects for delete
   using (
-    bucket_id = 'kyc-docs'
+    bucket_id = 'documents'
     and auth.uid()::text = (storage.foldername(name))[1]
   );
 

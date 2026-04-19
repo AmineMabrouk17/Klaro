@@ -83,7 +83,7 @@ bankRouter.get('/clients', validate(clientsQuerySchema, 'query'), async (req, re
     return res.status(500).json({ error: 'Failed to fetch clients' });
   }
 
-  let rows = ((data ?? []) as unknown) as Array<{
+  let rows = (data ?? []) as Array<{
     user_id: string;
     full_name: string;
     kyc_status: string;
@@ -93,7 +93,6 @@ bankRouter.get('/clients', validate(clientsQuerySchema, 'query'), async (req, re
     granted_at: string | null;
   }>;
 
-  // Sort in application layer (RPC returns unsorted).
   rows.sort((a, b) => {
     let diff = 0;
     if (sortBy === 'score') {
@@ -110,7 +109,6 @@ bankRouter.get('/clients', validate(clientsQuerySchema, 'query'), async (req, re
   const start = (page - 1) * limit;
   const paged = rows.slice(start, start + limit);
 
-  // Map snake_case → camelCase for the frontend.
   const clients = paged.map((r) => ({
     id: r.user_id,
     name: r.full_name,
@@ -154,8 +152,6 @@ bankRouter.get('/clients/:id', async (req, res) => {
 
 // ---------------------------------------------------------------------------
 // GET /api/bank/clients/:id/score
-// Consent-gated score viewer. Writes audit log on every access.
-// NEVER returns transactions, chat history, or raw KYC documents.
 // ---------------------------------------------------------------------------
 
 bankRouter.get('/clients/:id/score', async (req, res) => {
@@ -179,7 +175,6 @@ bankRouter.get('/clients/:id/score', async (req, res) => {
     return res.status(500).json({ error: 'Failed to fetch score' });
   }
 
-  // Audit every score view by a bank actor.
   auditLog(bankId, 'view_score', 'credit_scores', clientId, {
     score: score?.score ?? null,
     score_band: score?.score_band ?? null,
@@ -194,15 +189,12 @@ bankRouter.get('/clients/:id/score', async (req, res) => {
 
 // ---------------------------------------------------------------------------
 // POST /api/bank/clients/:id/request-consent
-// Broadcasts a Supabase Realtime event to the target user's channel,
-// asking them to grant (or expand) consent for this bank.
 // ---------------------------------------------------------------------------
 
 bankRouter.post('/clients/:id/request-consent', async (req, res) => {
   const bankId = req.user!.id;
   const targetUserId = req.params.id;
 
-  // Confirm the target user exists (basic guard).
   const { data: profile } = await supabaseAdmin
     .from('profiles')
     .select('id, full_name')
@@ -225,7 +217,6 @@ bankRouter.post('/clients/:id/request-consent', async (req, res) => {
     });
   } catch (err) {
     logger.warn({ err, bankId, targetUserId }, 'consent_requested realtime broadcast failed');
-    // Do not fail the request — the audit log still records the intent.
   }
 
   auditLog(bankId, 'request_consent', 'profiles', targetUserId);

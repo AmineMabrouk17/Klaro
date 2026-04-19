@@ -53,7 +53,6 @@ export default function BankClientsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Filters
   const [search, setSearch] = useState('');
   const [bandFilter, setBandFilter] = useState('');
   const [kycFilter, setKycFilter] = useState('');
@@ -81,7 +80,6 @@ export default function BankClientsPage() {
     void fetchClients();
   }, [fetchClients]);
 
-  // Client-side filtering (search + band + kyc + scope).
   const filtered = allClients.filter((c) => {
     if (search && !c.name.toLowerCase().includes(search.toLowerCase())) return false;
     if (bandFilter && c.scoreBand !== bandFilter) return false;
@@ -101,7 +99,6 @@ export default function BankClientsPage() {
         </p>
       </div>
 
-      {/* Search + Filters */}
       <div className="flex flex-wrap gap-3">
         <Input
           placeholder="Search by name…"
@@ -117,7 +114,9 @@ export default function BankClientsPage() {
         >
           <option value="">All bands</option>
           {SCORE_BANDS.map((b) => (
-            <option key={b} value={b}>{b.replace('_', ' ')}</option>
+            <option key={b} value={b}>
+              {b.replace('_', ' ')}
+            </option>
           ))}
         </select>
 
@@ -128,7 +127,9 @@ export default function BankClientsPage() {
         >
           <option value="">All KYC statuses</option>
           {KYC_STATUSES.map((s) => (
-            <option key={s} value={s}>{s}</option>
+            <option key={s} value={s}>
+              {s}
+            </option>
           ))}
         </select>
 
@@ -139,7 +140,9 @@ export default function BankClientsPage() {
         >
           <option value="">All consent scopes</option>
           {CONSENT_SCOPES.map((s) => (
-            <option key={s} value={s}>{s.replace('_', ' ')}</option>
+            <option key={s} value={s}>
+              {s.replace('_', ' ')}
+            </option>
           ))}
         </select>
 
@@ -168,8 +171,8 @@ export default function BankClientsPage() {
             {loading
               ? 'Loading…'
               : total === 0
-              ? 'No clients have granted you access yet'
-              : `${total} consented user${total === 1 ? '' : 's'}`}
+                ? 'No clients have granted you access yet'
+                : `${total} consented user${total === 1 ? '' : 's'}`}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -205,12 +208,20 @@ export default function BankClientsPage() {
                     <tr key={c.id} className="hover:bg-muted/30">
                       <td className="py-3 font-medium">{c.name}</td>
                       <td className="py-3 tabular-nums">
-                        {c.score !== null ? c.score : <span className="text-muted-foreground">—</span>}
+                        {c.score !== null ? (
+                          c.score
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
                       </td>
-                      <td className={`py-3 font-medium ${BAND_CLASSES[c.scoreBand ?? ''] ?? 'text-muted-foreground'}`}>
+                      <td
+                        className={`py-3 font-medium ${BAND_CLASSES[c.scoreBand ?? ''] ?? 'text-muted-foreground'}`}
+                      >
                         {c.scoreBand ? c.scoreBand.replace('_', ' ') : '—'}
                       </td>
-                      <td className={`py-3 capitalize ${KYC_CLASSES[c.kycStatus] ?? 'text-muted-foreground'}`}>
+                      <td
+                        className={`py-3 capitalize ${KYC_CLASSES[c.kycStatus] ?? 'text-muted-foreground'}`}
+                      >
                         {c.kycStatus}
                       </td>
                       <td className="py-3 text-muted-foreground">
@@ -231,7 +242,6 @@ export default function BankClientsPage() {
             </div>
           )}
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="mt-4 flex items-center justify-between text-sm">
               <span className="text-muted-foreground">

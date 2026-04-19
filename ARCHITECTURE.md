@@ -78,12 +78,15 @@ sequenceDiagram
   A-->>W: { score, breakdown }
   W-->>U: HTML stream with score gauge
 
-  U->>W: POST /api/score/compute (client action)
+  U->>W: POST /api/score/calculate (client button)
   W->>A: forward with JWT
-  A->>M: POST /score (features)
-  M-->>A: { score, band, breakdown, flags }
-  A->>S: insert credit_scores
-  A-->>W: 202 accepted
+  A->>S: guard — KYC verified + bank connection exists
+  A->>M: POST /score { userId }
+  M->>S: fetch transactions, profile, bank_connections, kyc_documents
+  M-->>A: { score, band, breakdown, flags, coaching_tips, ... }
+  A->>S: insert credit_scores + audit_logs
+  A->>S: broadcast score:userId (Realtime)
+  A-->>W: { score, scoreBand, ... } (synchronous JSON)
 ```
 
 ---
