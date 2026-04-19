@@ -71,9 +71,11 @@ function ScoreCalculationProgress({
 
   return (
     <div className={className} role="status" aria-live="polite" aria-busy="true">
-      <div className="mb-2 flex items-center justify-between gap-3 text-xs text-muted-foreground">
-        <span className="min-w-0 truncate">{label}</span>
-        <span className="tabular-nums text-muted-foreground/80">{Math.round(clamped)}%</span>
+      <div className="mb-2 flex items-center justify-between gap-3 text-xs">
+        <span className="min-w-0 truncate text-muted-foreground">{label}</span>
+        <span className="shrink-0 font-semibold tabular-nums text-foreground">
+          {Math.round(clamped)}%
+        </span>
       </div>
       <div
         className="h-2 w-full overflow-hidden rounded-full bg-muted"
