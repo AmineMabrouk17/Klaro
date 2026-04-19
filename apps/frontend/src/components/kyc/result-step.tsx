@@ -10,7 +10,8 @@ import { api } from '@/lib/api';
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const KYC_FACE_CROP_KEY = 'klaro.kyc.face_crop';
-const KYC_SELFIE_KEY = 'klaro.kyc.selfie';
+const KYC_SELFIE_KEY    = 'klaro.kyc.selfie';
+const KYC_DOC_ID_KEY    = 'klaro.kyc.doc_id';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -172,6 +173,7 @@ export function ResultStep() {
 
     const selfie = sessionStorage.getItem(KYC_SELFIE_KEY);
     const docFace = sessionStorage.getItem(KYC_FACE_CROP_KEY);
+    const docId   = sessionStorage.getItem(KYC_DOC_ID_KEY);
 
     if (!selfie || !docFace) {
       setState({ status: 'missing_data' });
@@ -182,12 +184,14 @@ export function ResultStep() {
       const result = await api.post<FaceMatchResult>('/api/kyc/face-match', {
         selfie_base64: selfie,
         doc_face_base64: docFace,
+        ...(docId ? { doc_id: docId } : {}),
       });
 
       if (result.match) {
-        // Clean up session data on success
+        // Clean up all KYC session data on success
         sessionStorage.removeItem(KYC_SELFIE_KEY);
         sessionStorage.removeItem(KYC_FACE_CROP_KEY);
+        sessionStorage.removeItem(KYC_DOC_ID_KEY);
         setState({ status: 'success', similarity: result.similarity });
       } else {
         setState({ status: 'failure', similarity: result.similarity });

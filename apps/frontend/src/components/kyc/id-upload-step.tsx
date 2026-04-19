@@ -25,8 +25,8 @@ interface ExtractedFields {
 }
 
 type OcrResult =
-  | { success: true; extracted: ExtractedFields; face_crop_base64: string; confidence: number; quality_score: number }
-  | { success: false; reason: 'low_quality' | 'no_face_detected' };
+  | { success: true; extracted: ExtractedFields; face_crop_base64: string; confidence: number; quality_score: number; doc_id?: string }
+  | { success: false; reason: 'low_quality' | 'no_face_detected' | 'incomplete_extraction'; missing_fields?: string[] };
 
 // Documents that have a meaningful back side worth scanning
 const HAS_VERSO = new Set<DocumentType>(['cin', 'driver_license']);
@@ -188,10 +188,28 @@ const DOC_TYPES: { value: DocumentType; label: string }[] = [
 ];
 
 const ERROR_MESSAGES: Record<string, string> = {
-  low_quality: 'The image is too blurry or zoomed-in. Move further back so the full card is visible, use bright even lighting, and hold the camera steady.',
-  tilted_image: 'The document is at too steep an angle. Lay it flat on a surface and shoot straight down — avoid holding the camera to the side.',
+  low_quality:   'The image is too blurry or zoomed-in. Move further back so the full card is visible, use bright even lighting, and hold the camera steady.',
+  tilted_image:  'The document is at too steep an angle. Lay it flat on a surface and shoot straight down — avoid holding the camera to the side.',
   no_face_detected: 'No face photo was detected on the document. Make sure the portrait is clearly visible and unobstructed.',
 };
+
+const FIELD_LABELS: Record<string, string> = {
+  cin_number:       'ID number',
+  full_name_latin:  'Full name',
+  date_of_birth:    'Date of birth',
+  expiry_date:      'Expiry date',
+  gender:           'Gender',
+};
+
+function buildErrorMessage(result: Extract<OcrResult, { success: false }>): string {
+  if (result.reason === 'incomplete_extraction') {
+    const labels = result.missing_fields
+      ?.map((f) => FIELD_LABELS[f] ?? f)
+      .join(', ');
+    return `Some required fields couldn't be read: ${labels}. Please retake the photo — make sure the full card is flat, well-lit, and all text is clearly visible.`;
+  }
+  return ERROR_MESSAGES[result.reason] ?? `Extraction failed: ${result.reason}`;
+}
 
 // ── Main component ────────────────────────────────────────────────────────────
 
@@ -240,7 +258,7 @@ export function IdUploadStep({ onSuccess }: IdUploadStepProps) {
       if (!raw.success) {
         setState({
           status: 'error',
-          message: ERROR_MESSAGES[raw.reason] ?? `Extraction failed: ${raw.reason}`,
+          message: buildErrorMessage(raw),
         });
         return;
       }

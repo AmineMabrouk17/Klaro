@@ -7,14 +7,16 @@ import { Button } from '@/components/ui/button';
 import { IdUploadStep } from '@/components/kyc/id-upload-step';
 
 const KYC_FACE_CROP_KEY = 'klaro.kyc.face_crop';
+const KYC_DOC_ID_KEY    = 'klaro.kyc.doc_id';
 
 export default function KycPage() {
   const router = useRouter();
   const [step1Done, setStep1Done] = React.useState(false);
 
   const handleStep1Success = React.useCallback(
-    (result: { face_crop_base64: string }) => {
+    (result: { face_crop_base64: string; doc_id?: string }) => {
       sessionStorage.setItem(KYC_FACE_CROP_KEY, result.face_crop_base64);
+      if (result.doc_id) sessionStorage.setItem(KYC_DOC_ID_KEY, result.doc_id);
       setStep1Done(true);
     },
     [],
