@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { API_ENDPOINTS, TUNISIAN_BANKS } from '@klaro/shared';
@@ -57,6 +58,31 @@ function saveConnectedBanks(states: Record<string, BankState>) {
   } catch {
     // localStorage unavailable — fail silently
   }
+}
+
+const BANK_LOGOS: Record<string, string> = {
+  ubci: '/banks/ubci.png',
+  attijari: '/banks/attijari.png',
+  stb: '/banks/stb.png',
+  biat: '/banks/biat.png',
+  amen: '/banks/amen.jpg',
+  uib: '/banks/uib.jpg',
+};
+
+function BankLogo({ id, name }: { id: string; name: string }) {
+  const src = BANK_LOGOS[id];
+  if (src) {
+    return (
+      <div className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center shrink-0 overflow-hidden p-1.5">
+        <Image src={src} alt={name} width={44} height={44} className="w-full h-full object-contain" />
+      </div>
+    );
+  }
+  return (
+    <div className="w-11 h-11 rounded-2xl bg-white/8 flex items-center justify-center text-xl font-bold text-white/60 shrink-0">
+      {name.charAt(0)}
+    </div>
+  );
 }
 
 export default function ConnectBankPage() {
@@ -264,7 +290,7 @@ export default function ConnectBankPage() {
             onClick={() => router.push('/dashboard')}
             className="shrink-0 px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white btn-glow transition-all"
           >
-            Continue →
+            See my score →
           </button>
         </div>
       )}
@@ -294,9 +320,7 @@ export default function ConnectBankPage() {
               className={`glass-card p-4 transition-all ${queued ? 'border-green-500/30' : ''}`}
             >
               <div className="flex items-start gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-white/8 flex items-center justify-center text-xl font-bold text-white/60 shrink-0">
-                  {bank.shortName.charAt(0)}
-                </div>
+                <BankLogo id={bank.id} name={bank.shortName} />
                 <div className="flex-1 min-w-0 space-y-2">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">

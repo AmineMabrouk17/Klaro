@@ -57,6 +57,14 @@ const config: Config = {
           veryGood: 'hsl(142 71% 45%)',
           excellent: 'hsl(160 84% 39%)',
         },
+        marketing: {
+          bg: 'hsl(var(--marketing-bg))',
+          fg: 'hsl(var(--marketing-fg))',
+          muted: 'hsl(var(--marketing-muted))',
+          subtle: 'hsl(var(--marketing-subtle))',
+          line: 'hsl(var(--marketing-line))',
+          accent: 'hsl(var(--marketing-accent))',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -65,6 +73,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: [
+          'var(--font-sans)',
           'ui-sans-serif',
           'system-ui',
           '-apple-system',
@@ -75,7 +84,22 @@ const config: Config = {
           'Arial',
           'sans-serif',
         ],
-        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+        mono: [
+          'var(--font-mono)',
+          'ui-monospace',
+          'SFMono-Regular',
+          'Menlo',
+          'Monaco',
+          'Consolas',
+          'monospace',
+        ],
+        display: [
+          'var(--font-sans)',
+          'ui-sans-serif',
+          'system-ui',
+          '-apple-system',
+          'sans-serif',
+        ],
       },
       keyframes: {
         'accordion-down': {

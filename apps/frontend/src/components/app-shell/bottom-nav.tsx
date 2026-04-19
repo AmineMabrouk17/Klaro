@@ -2,14 +2,22 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { motion } from 'framer-motion';
+import {
+  LayoutDashboard,
+  IdCard,
+  Landmark,
+  FileText,
+  Sparkles,
+} from 'lucide-react';
 import { cn } from '@klaro/ui/cn';
 
 const items = [
-  { href: '/dashboard',    emoji: '🏠', label: 'Home' },
-  { href: '/kyc',          emoji: '🪪', label: 'KYC' },
-  { href: '/connect-bank', emoji: '🏦', label: 'Bank' },
-  { href: '/documents',    emoji: '📄', label: 'Docs' },
-  { href: '/chat',         emoji: '🤖', label: 'Advisor' },
+  { href: '/dashboard',    icon: LayoutDashboard, label: 'Home' },
+  { href: '/kyc',          icon: IdCard,          label: 'ID' },
+  { href: '/connect-bank', icon: Landmark,        label: 'Bank' },
+  { href: '/documents',    icon: FileText,        label: 'Docs' },
+  { href: '/chat',         icon: Sparkles,        label: 'Advisor' },
 ];
 
 export function BottomNav() {
@@ -17,30 +25,30 @@ export function BottomNav() {
 
   return (
     <nav className="lg:hidden fixed bottom-0 inset-x-0 z-50 pb-safe">
-      <div className="glass-strong border-t border-white/10 px-2 pt-2 pb-1">
+      <div className="hairline-t bg-[hsl(var(--marketing-bg))]/92 backdrop-blur-md px-2 pt-2 pb-1">
         <div className="flex items-center justify-around">
           {items.map((item) => {
             const active = pathname === item.href || pathname.startsWith(item.href + '/');
+            const Icon = item.icon;
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all min-w-[52px]',
-                  active
-                    ? 'bg-indigo-500/20'
-                    : 'opacity-50 hover:opacity-80',
+                  'relative flex flex-col items-center gap-1 px-3 py-1.5 rounded-md transition-colors min-w-[56px]',
+                  active ? 'text-white' : 'text-white/45 hover:text-white/80',
                 )}
               >
-                <span className={cn('text-2xl leading-none transition-transform', active && 'scale-110')}>
-                  {item.emoji}
-                </span>
-                <span
-                  className={cn(
-                    'text-[10px] font-medium tracking-wide',
-                    active ? 'text-indigo-300' : 'text-white/60',
-                  )}
-                >
+                {active && (
+                  <motion.span
+                    layoutId="bottomnav-active"
+                    className="absolute inset-0 rounded-md bg-white/[0.06] hairline"
+                    transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                    aria-hidden
+                  />
+                )}
+                <Icon className="relative h-[18px] w-[18px]" strokeWidth={1.6} />
+                <span className="relative mono text-[9px] tracking-[0.14em] uppercase">
                   {item.label}
                 </span>
               </Link>

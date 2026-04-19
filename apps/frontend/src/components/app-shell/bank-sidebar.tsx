@@ -3,33 +3,21 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import {
-  LayoutDashboard,
-  IdCard,
-  Landmark,
-  Receipt,
-  FileText,
-  Sparkles,
-} from 'lucide-react';
+import { Users } from 'lucide-react';
 import { cn } from '@klaro/ui/cn';
 
 const items = [
-  { href: '/dashboard',    icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/kyc',          icon: IdCard,          label: 'Identity' },
-  { href: '/connect-bank', icon: Landmark,        label: 'Bank' },
-  { href: '/transactions', icon: Receipt,         label: 'Transactions' },
-  { href: '/documents',    icon: FileText,        label: 'Documents' },
-  { href: '/chat',         icon: Sparkles,        label: 'Advisor' },
+  { href: '/bank/clients', icon: Users, label: 'Clients' },
 ];
 
-export function Sidebar() {
+export function BankSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden lg:flex lg:flex-col w-60 shrink-0 fixed inset-y-0 left-0 z-40 min-h-0 isolate hairline-r bg-[hsl(var(--marketing-bg))]/85 backdrop-blur-md">
+    <aside className="hidden lg:flex lg:flex-col w-60 shrink-0 fixed inset-y-0 left-0 z-40 hairline-r bg-[hsl(var(--marketing-bg))]/85 backdrop-blur-md">
       <div className="flex h-14 items-center px-5 hairline-b">
         <Link
-          href="/dashboard"
+          href="/bank/clients"
           className="flex items-center gap-2.5 text-[15px] font-semibold tracking-tight text-white"
         >
           <span
@@ -50,13 +38,14 @@ export function Sidebar() {
             </svg>
           </span>
           <span>Klaro</span>
-          <span className="mono text-[10px] tracking-[0.18em] text-white/35">/ APP</span>
+          <span className="mono text-[10px] tracking-[0.18em] text-white/35">/ BANK</span>
         </Link>
       </div>
 
       <nav className="flex-1 p-2 space-y-0.5">
         {items.map((item) => {
-          const active = pathname === item.href || pathname.startsWith(item.href + '/');
+          const active =
+            pathname === item.href || pathname.startsWith(item.href + '/');
           const Icon = item.icon;
           return (
             <Link
@@ -71,7 +60,7 @@ export function Sidebar() {
             >
               {active && (
                 <motion.span
-                  layoutId="sidebar-active"
+                  layoutId="bank-sidebar-active"
                   className="absolute inset-0 rounded-md bg-white/[0.06] hairline"
                   transition={{ type: 'spring', stiffness: 380, damping: 32 }}
                   aria-hidden
@@ -79,14 +68,6 @@ export function Sidebar() {
               )}
               <Icon className="relative h-4 w-4 shrink-0" strokeWidth={1.6} />
               <span className="relative">{item.label}</span>
-              {active && (
-                <span
-                  aria-hidden
-                  className="relative ml-auto mono text-[10px] tracking-[0.18em] text-white/55"
-                >
-                  →
-                </span>
-              )}
             </Link>
           );
         })}
@@ -96,11 +77,11 @@ export function Sidebar() {
         <div className="flex items-center gap-2 mb-2">
           <span className="status-dot" />
           <span className="mono text-[10px] tracking-[0.18em] text-white/55">
-            API · OPERATIONAL
+            PARTNER · LIVE
           </span>
         </div>
         <p className="mono text-[9px] tracking-[0.18em] text-white/25">
-          © {new Date().getFullYear()} KLARO · TUNIS
+          © {new Date().getFullYear()} KLARO PROTOCOL
         </p>
       </div>
     </aside>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,26 +34,33 @@ export default function RegisterPage() {
       toast.error(error.message);
       return;
     }
-    toast.success('Check your email to confirm your account ✉️');
+    toast.success('Check your email to confirm your account');
     router.push('/login');
   }
 
   return (
-    <div className="space-y-6">
-      {/* Hero */}
-      <div className="text-center space-y-2">
-        <div className="text-5xl mb-1">👋</div>
-        <h1 className="text-2xl font-bold text-white">Welcome to Klaro</h1>
-        <p className="text-sm text-white/50">
-          Build your alternative credit profile 📊
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] as const }}
+      className="hairline rounded-2xl bg-white/[0.025] p-8 space-y-6 backdrop-blur-sm"
+    >
+      <div className="space-y-2">
+        <div className="mono text-[10.5px] tracking-[0.18em] uppercase text-white/55">
+          Create account
+        </div>
+        <h1 className="text-2xl font-semibold tracking-tight text-white">
+          Start your real
+          <br />
+          financial story.
+        </h1>
+        <p className="text-sm text-white/55">
+          Five minutes to your first score. Free to start.
         </p>
       </div>
 
       <form className="space-y-4" onSubmit={onSubmit}>
-        <div className="space-y-1.5">
-          <Label htmlFor="full_name" className="text-white/70 text-xs font-medium uppercase tracking-wider">
-            Full name
-          </Label>
+        <Field label="Full name">
           <Input
             id="full_name"
             autoComplete="name"
@@ -60,13 +68,10 @@ export default function RegisterPage() {
             placeholder="Amen Dhahri"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="glass border-white/10 bg-white/5 text-white placeholder:text-white/25 focus:border-indigo-500/50 focus:ring-indigo-500/20 h-12 rounded-xl"
+            className="h-11"
           />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="email" className="text-white/70 text-xs font-medium uppercase tracking-wider">
-            Email
-          </Label>
+        </Field>
+        <Field label="Email">
           <Input
             id="email"
             type="email"
@@ -75,13 +80,10 @@ export default function RegisterPage() {
             placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="glass border-white/10 bg-white/5 text-white placeholder:text-white/25 focus:border-indigo-500/50 focus:ring-indigo-500/20 h-12 rounded-xl"
+            className="h-11"
           />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="password" className="text-white/70 text-xs font-medium uppercase tracking-wider">
-            Password
-          </Label>
+        </Field>
+        <Field label="Password">
           <Input
             id="password"
             type="password"
@@ -91,24 +93,43 @@ export default function RegisterPage() {
             placeholder="Min. 8 characters"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="glass border-white/10 bg-white/5 text-white placeholder:text-white/25 focus:border-indigo-500/50 focus:ring-indigo-500/20 h-12 rounded-xl"
+            className="h-11"
           />
-        </div>
-        <Button
-          type="submit"
-          className="w-full h-12 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold btn-glow transition-all"
-          disabled={busy}
-        >
-          {busy ? 'Creating account…' : 'Create account 🚀'}
+        </Field>
+        <Button type="submit" className="w-full h-11" disabled={busy}>
+          {busy ? 'Creating account…' : (
+            <>
+              Create account
+              <span aria-hidden>→</span>
+            </>
+          )}
         </Button>
       </form>
 
-      <p className="text-center text-sm text-white/40">
+      <p className="mono text-[10.5px] tracking-[0.16em] uppercase text-white/35 text-center">
+        By signing up you agree to our terms & privacy
+      </p>
+
+      <div className="hairline-t pt-4 text-center text-sm text-white/55">
         Already have an account?{' '}
-        <Link href="/login" className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
+        <Link
+          href="/login"
+          className="text-white hover:underline underline-offset-4 font-medium"
+        >
           Sign in
         </Link>
-      </p>
+      </div>
+    </motion.div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="mono text-[10.5px] tracking-[0.18em] uppercase text-white/55">
+        {label}
+      </Label>
+      {children}
     </div>
   );
 }

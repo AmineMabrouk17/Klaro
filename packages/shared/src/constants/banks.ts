@@ -41,22 +41,6 @@ export const TUNISIAN_BANKS: readonly BankInfo[] = [
     logoSlug: 'biat',
   },
   {
-    id: 'bna',
-    name: 'Banque Nationale Agricole',
-    shortName: 'BNA',
-    loginUrl: 'https://www.bna.tn/',
-    supported: false,
-    logoSlug: 'bna',
-  },
-  {
-    id: 'bh',
-    name: 'Banque de l\'Habitat',
-    shortName: 'BH',
-    loginUrl: 'https://www.bh.com.tn/',
-    supported: false,
-    logoSlug: 'bh',
-  },
-  {
     id: 'amen',
     name: 'Amen Bank',
     shortName: 'Amen',

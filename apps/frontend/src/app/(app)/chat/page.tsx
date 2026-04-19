@@ -2,15 +2,16 @@ import { redirect } from 'next/navigation';
 import { requireUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 
-/**
- * Server component — finds or creates the user's most recent chat session and
- * immediately redirects to /chat/[id] so the URL always reflects a session.
- */
-export default async function ChatPage() {
+interface Props {
+  searchParams: Promise<{ q?: string }>;
+}
+
+export default async function ChatPage({ searchParams }: Props) {
+  const { q } = await searchParams;
+  const qSuffix = q ? `?q=${encodeURIComponent(q)}` : '';
   const user = await requireUser();
   const supabase = await createClient();
 
-  // Try to find the most recent non-archived session.
   const { data: sessions } = await supabase
     .from('chat_sessions')
     .select('id')
@@ -21,10 +22,9 @@ export default async function ChatPage() {
 
   const firstSession = (sessions as Array<{ id: string }> | null)?.[0];
   if (firstSession?.id) {
-    redirect(`/chat/${firstSession.id}`);
+    redirect(`/chat/${firstSession.id}${qSuffix}`);
   }
 
-  // No session yet — create one via the backend API (uses the access token).
   const {
     data: { session: authSession },
   } = await supabase.auth.getSession();
@@ -40,10 +40,9 @@ export default async function ChatPage() {
     });
     if (res.ok) {
       const newSession = (await res.json()) as { id: string };
-      redirect(`/chat/${newSession.id}`);
+      redirect(`/chat/${newSession.id}${qSuffix}`);
     }
   }
 
-  // Fallback: redirect to a fresh chat without a specific session (handled gracefully).
-  redirect('/chat/new');
+  redirect(`/chat/new${qSuffix}`);
 }

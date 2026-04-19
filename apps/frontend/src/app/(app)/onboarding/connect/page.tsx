@@ -1,8 +1,34 @@
+import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
+import { createClient } from '@/lib/supabase/server';
 
 export default async function OnboardingConnectPage() {
-  await requireUser();
+  const user = await requireUser();
+  const supabase = await createClient();
+
+  // If the user already has a connected bank OR processed documents, they've
+  // completed this step — send them straight to the score dashboard.
+  const [{ data: bankConn }, { data: statement }] = await Promise.all([
+    supabase
+      .from('bank_connections')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('sync_status', 'success')
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from('bank_statements')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('status', 'processed')
+      .limit(1)
+      .maybeSingle(),
+  ]);
+
+  if (bankConn || statement) {
+    redirect('/dashboard');
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
@@ -75,13 +101,6 @@ export default async function OnboardingConnectPage() {
         You can always add more data later to improve your score 📈
       </p>
 
-      {/* Skip for now */}
-      <Link
-        href="/dashboard"
-        className="mt-4 text-xs text-white/25 hover:text-white/50 transition-colors underline underline-offset-4"
-      >
-        Skip for now
-      </Link>
     </div>
   );
 }

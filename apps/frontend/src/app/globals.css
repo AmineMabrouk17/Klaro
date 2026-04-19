@@ -4,33 +4,33 @@
 
 @layer base {
   :root {
-    --background: 222 47% 5%;
-    --foreground: 210 40% 95%;
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
 
-    --card: 220 40% 8%;
-    --card-foreground: 210 40% 95%;
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 220 40% 8%;
-    --popover-foreground: 210 40% 95%;
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 239 84% 67%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 4%;
 
-    --secondary: 220 30% 14%;
-    --secondary-foreground: 210 40% 95%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 220 30% 14%;
-    --muted-foreground: 215 20% 55%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 55%;
 
-    --accent: 220 30% 14%;
-    --accent-foreground: 210 40% 95%;
+    --accent: 14 100% 57%;
+    --accent-foreground: 0 0% 4%;
 
     --destructive: 0 62.8% 50%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 220 25% 16%;
-    --input: 220 25% 16%;
-    --ring: 239 84% 67%;
+    --border: 0 0% 14%;
+    --input: 0 0% 14%;
+    --ring: 0 0% 78%;
 
     --radius: 1rem;
 
@@ -41,6 +41,14 @@
     --glass-border-strong: rgba(255, 255, 255, 0.18);
     --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     --glass-shadow-strong: 0 12px 48px rgba(0, 0, 0, 0.55);
+
+    /* Marketing (SAID-style) tokens — used only by the (marketing) layout */
+    --marketing-bg: 0 0% 4%;
+    --marketing-fg: 0 0% 98%;
+    --marketing-muted: 0 0% 55%;
+    --marketing-subtle: 0 0% 38%;
+    --marketing-line: 0 0% 100%;
+    --marketing-accent: 14 100% 57%;
   }
 
   /* Force dark always — this is a dark glass app */
@@ -60,61 +68,60 @@
 }
 
 /* ──────────────────────────────────────────────
-   App gradient background
+   App background — unified with marketing surface.
+   Pure dark base + dotted grid + warm spotlight.
 ─────────────────────────────────────────────── */
 @layer utilities {
   .app-gradient {
-    background:
-      radial-gradient(ellipse 80% 50% at 15% 10%, rgba(99, 102, 241, 0.18) 0%, transparent 60%),
-      radial-gradient(ellipse 70% 60% at 85% 90%, rgba(59, 130, 246, 0.14) 0%, transparent 60%),
-      radial-gradient(ellipse 50% 40% at 60% 40%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
-      linear-gradient(145deg, hsl(222, 47%, 5%) 0%, hsl(230, 45%, 7%) 50%, hsl(240, 43%, 6%) 100%);
+    background-color: hsl(var(--marketing-bg));
+    background-image:
+      radial-gradient(ellipse 60% 30% at 50% 0%, rgba(255, 122, 69, 0.05) 0%, transparent 70%),
+      radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: auto, 22px 22px;
+    background-position: 0 0, -1px -1px;
   }
 
-  /* ── Glass cards ── */
+  /* ── Glass cards (now: hairline cards on dark) ── */
   .glass {
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow);
+    background: rgb(255 255 255 / 0.025);
+    border: 1px solid rgb(255 255 255 / 0.08);
+    border-radius: 0.75rem;
   }
 
-  /* Opaque base + frosted layer avoids backdrop-filter “seams” at panel edges (sidebar / topbar). */
   .glass-strong {
-    background:
-      var(--glass-bg-strong),
-      hsl(var(--background) / 0.92);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid var(--glass-border-strong);
-    box-shadow: var(--glass-shadow-strong);
+    background: hsl(var(--marketing-bg) / 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgb(255 255 255 / 0.08);
   }
 
   .glass-card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow);
-    border-radius: 1.25rem;
+    background: rgb(255 255 255 / 0.025);
+    border: 1px solid rgb(255 255 255 / 0.08);
+    border-radius: 0.875rem;
+    transition: border-color 200ms ease, background-color 200ms ease;
+  }
+  .glass-card:hover {
+    background: rgb(255 255 255 / 0.04);
+    border-color: rgb(255 255 255 / 0.16);
   }
 
   .glass-card-strong {
-    background: var(--glass-bg-strong);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid var(--glass-border-strong);
-    box-shadow: var(--glass-shadow-strong);
-    border-radius: 1.25rem;
+    background: rgb(255 255 255 / 0.04);
+    border: 1px solid rgb(255 255 255 / 0.12);
+    border-radius: 0.875rem;
   }
 
-  /* ── Glow button ── */
+  /* ── Glow button (kept for backwards compat — now a subtle accent glow) ── */
   .btn-glow {
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.35), 0 4px 12px rgba(0, 0, 0, 0.4);
+    box-shadow:
+      0 0 24px rgba(255, 122, 69, 0.18),
+      0 4px 12px rgba(0, 0, 0, 0.4);
   }
   .btn-glow:hover {
-    box-shadow: 0 0 28px rgba(99, 102, 241, 0.5), 0 6px 16px rgba(0, 0, 0, 0.5);
+    box-shadow:
+      0 0 32px rgba(255, 122, 69, 0.28),
+      0 6px 16px rgba(0, 0, 0, 0.5);
   }
 
   /* ── Score glow colours ── */
@@ -126,4 +133,129 @@
   /* ── Safe area helpers for iOS ── */
   .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
   .pt-safe { padding-top:    env(safe-area-inset-top,    0px); }
+}
+
+/* ──────────────────────────────────────────────
+   Marketing surface (SAID-style)
+   Pure dark, dotted-grid, hairline borders, mono accents.
+   Scoped under `.marketing-shell` so authenticated app
+   surfaces are unaffected.
+─────────────────────────────────────────────── */
+@layer utilities {
+  .marketing-shell {
+    background: hsl(var(--marketing-bg));
+    color: hsl(var(--marketing-fg));
+  }
+
+  /* Subtle dotted grid — SVG data URI, ~22px cell, 1px dot at ~6% white. */
+  .marketing-grid {
+    background-image:
+      radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    background-size: 22px 22px;
+    background-position: -1px -1px;
+  }
+
+  /* Faint vignette + warm spotlight to keep the page from looking flat. */
+  .marketing-vignette {
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255, 122, 69, 0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 80% 60% at 50% 100%, rgba(0, 0, 0, 0.6) 0%, transparent 60%);
+  }
+
+  .hairline {
+    border: 1px solid rgb(255 255 255 / 0.08);
+  }
+  .hairline-t { border-top: 1px solid rgb(255 255 255 / 0.08); }
+  .hairline-b { border-bottom: 1px solid rgb(255 255 255 / 0.08); }
+  .hairline-l { border-left: 1px solid rgb(255 255 255 / 0.08); }
+  .hairline-r { border-right: 1px solid rgb(255 255 255 / 0.08); }
+
+  .marketing-card {
+    background: rgb(255 255 255 / 0.02);
+    border: 1px solid rgb(255 255 255 / 0.08);
+    border-radius: 0.75rem;
+  }
+
+  .marketing-card-hover {
+    transition:
+      background-color 200ms ease,
+      border-color 200ms ease,
+      transform 200ms ease;
+  }
+  .marketing-card-hover:hover {
+    background: rgb(255 255 255 / 0.04);
+    border-color: rgb(255 255 255 / 0.16);
+  }
+
+  .terminal-block {
+    background: rgb(0 0 0 / 0.6);
+    border: 1px solid rgb(255 255 255 / 0.1);
+    border-radius: 0.75rem;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    color: hsl(var(--marketing-fg));
+  }
+
+  .mono {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-feature-settings: 'ss01', 'ss02', 'cv01';
+  }
+
+  .accent-text {
+    color: hsl(var(--marketing-accent));
+  }
+
+  .btn-mark-primary {
+    background: hsl(var(--marketing-fg));
+    color: hsl(var(--marketing-bg));
+    border-radius: 0.625rem;
+    transition: transform 150ms ease, opacity 150ms ease;
+  }
+  .btn-mark-primary:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+  }
+
+  .btn-mark-ghost {
+    background: transparent;
+    color: hsl(var(--marketing-fg));
+    border: 1px solid rgb(255 255 255 / 0.14);
+    border-radius: 0.625rem;
+    transition: background-color 150ms ease, border-color 150ms ease;
+  }
+  .btn-mark-ghost:hover {
+    background: rgb(255 255 255 / 0.05);
+    border-color: rgb(255 255 255 / 0.28);
+  }
+
+  /* Status dot — pulse in green for "live" indicators. */
+  .status-dot {
+    position: relative;
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: hsl(142 71% 45%);
+  }
+  .status-dot::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 9999px;
+    background: hsl(142 71% 45% / 0.35);
+    animation: marketing-pulse 1.8s ease-out infinite;
+  }
+  @keyframes marketing-pulse {
+    0%   { transform: scale(0.7); opacity: 0.7; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+
+  /* Mono caps eyebrow text */
+  .eyebrow {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: hsl(var(--marketing-muted));
+  }
 }

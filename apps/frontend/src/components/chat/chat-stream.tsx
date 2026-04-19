@@ -15,6 +15,7 @@ import {
   Square,
 } from 'lucide-react';
 import { MessageBubble } from '@/components/chat/message-bubble';
+import { InteractiveDots } from '@/components/marketing/interactive-dots';
 import { createClient } from '@/lib/supabase/client';
 import { api } from '@/lib/api';
 import { env } from '@/lib/env';
@@ -263,9 +264,10 @@ interface HistoryMessage {
 
 interface ChatStreamProps {
   sessionId?: string;
+  initialPrompt?: string;
 }
 
-export function ChatStream({ sessionId }: ChatStreamProps) {
+export function ChatStream({ sessionId, initialPrompt }: ChatStreamProps) {
   const router = useRouter();
   const [messages, setMessages] = useState<UiMessage[]>([]);
   const [historyLoaded, setHistoryLoaded] = useState(false);
@@ -654,6 +656,14 @@ export function ChatStream({ sessionId }: ChatStreamProps) {
     [busy, runSend],
   );
 
+  // Auto-send initialPrompt once the session is ready and history is loaded.
+  const initialPromptFiredRef = useRef(false);
+  useEffect(() => {
+    if (!historyLoaded || !initialPrompt || initialPromptFiredRef.current) return;
+    initialPromptFiredRef.current = true;
+    void runSend(initialPrompt, 'score_tips', null);
+  }, [historyLoaded, initialPrompt, runSend]);
+
   const showEmptyState = historyLoaded && messages.length === 0;
 
   const lastMsg = messages[messages.length - 1];
@@ -676,10 +686,20 @@ export function ChatStream({ sessionId }: ChatStreamProps) {
       onDragLeave={onDragLeave}
       onDrop={onDrop}
     >
+      {/* Dotted grid background — same as marketing hero, toned down */}
+      <InteractiveDots
+        className="z-0"
+        spacing={28}
+        baseOpacity={0.07}
+        influence={130}
+        baseRadius={1}
+        maxRadius={2.2}
+      />
+
       {/* Drag-and-drop overlay */}
       {isDragging && (
-        <div className="pointer-events-none absolute inset-0 z-50 flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-primary/60 bg-background/90 backdrop-blur-sm">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+        <div className="pointer-events-none absolute inset-0 z-50 flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-accent/60 bg-background/90 backdrop-blur-sm">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-accent/10 text-accent">
             <UploadCloud className="h-8 w-8" strokeWidth={1.5} />
           </div>
           <div className="space-y-1 text-center">
@@ -690,7 +710,7 @@ export function ChatStream({ sessionId }: ChatStreamProps) {
       )}
 
       {/* Conversation area */}
-      <div className="flex-1 overflow-y-auto pb-2 pr-1">
+      <div className="relative z-10 flex-1 overflow-y-auto pb-2 pr-1">
         {/* History loading skeleton */}
         {!historyLoaded && (
           <div className="space-y-4 pt-4">
@@ -739,7 +759,7 @@ export function ChatStream({ sessionId }: ChatStreamProps) {
                       key={chip.prompt}
                       type="button"
                       onClick={() => sendQuickPrompt(chip.prompt, chip.mode)}
-                      className="rounded-full border border-border/60 bg-background/60 px-3 py-1.5 text-xs text-muted-foreground transition hover:border-primary/40 hover:bg-muted/40 hover:text-foreground"
+                      className="rounded-full border border-border/60 bg-background/60 px-3 py-1.5 text-xs text-muted-foreground transition hover:border-accent/40 hover:bg-muted/40 hover:text-foreground"
                     >
                       {chip.prompt}
                     </button>
@@ -753,8 +773,8 @@ export function ChatStream({ sessionId }: ChatStreamProps) {
         ) : null}
       </div>
 
-      {/* Composer */}
-      <div className="sticky bottom-0 mt-2 bg-gradient-to-t from-background via-background to-background/0 pt-3">
+      {/* Composer — full-width, breaks out of layout padding */}
+      <div className="relative z-10 sticky bottom-0 mt-2 -mx-4 px-4 lg:-mx-6 lg:px-6 bg-gradient-to-t from-background via-background to-background/0 pt-3 pb-safe">
         {/* Queue indicator */}
         {queueLength > 0 && (
           <div className="mb-2 flex items-center justify-between rounded-lg border border-border/60 bg-muted/40 px-3 py-1.5">
@@ -773,7 +793,7 @@ export function ChatStream({ sessionId }: ChatStreamProps) {
         {modeLocked && (
           <div className="mb-2 flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/40 px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              <span className="h-1.5 w-1.5 rounded-full bg-accent" />
               Mode: {MODE_LABELS[mode]}
               <button
                 type="button"
@@ -794,7 +814,7 @@ export function ChatStream({ sessionId }: ChatStreamProps) {
           onSubmit={handleSubmit}
           className={cn(
             'rounded-2xl border border-border/60 bg-background/80 shadow-sm backdrop-blur transition',
-            'focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20',
+            'focus-within:border-accent/50 focus-within:ring-2 focus-within:ring-accent/20',
           )}
         >
           {/* File preview strip */}
@@ -903,7 +923,7 @@ export function ChatStream({ sessionId }: ChatStreamProps) {
                   canSend && busy
                     ? 'bg-muted text-muted-foreground hover:bg-muted/80'
                     : canSend
-                    ? 'bg-primary text-primary-foreground hover:opacity-90'
+                    ? 'bg-accent text-accent-foreground hover:bg-accent/90'
                     : 'bg-muted text-muted-foreground',
                 )}
                 aria-label={busy ? 'Queue message' : 'Send message'}
@@ -916,7 +936,7 @@ export function ChatStream({ sessionId }: ChatStreamProps) {
               </button>
               {/* Queue badge */}
               {queueLength > 0 && (
-                <span className="pointer-events-none absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground">
+                <span className="pointer-events-none absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[9px] font-bold text-accent-foreground">
                   {queueLength}
                 </span>
               )}
@@ -949,13 +969,13 @@ function EmptyState({ cards, chips, onCardClick, onChipClick, userCtx }: EmptySt
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-8 py-6 text-center">
-      <div className="flex flex-col items-center gap-3">
-        <div className="relative">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 text-lg font-semibold text-white shadow-lg shadow-violet-500/20 ring-1 ring-white/10">
-            K
+        <div className="flex flex-col items-center gap-3">
+          <div className="relative">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-background border border-white/10 text-lg font-semibold text-white shadow-lg shadow-accent/10 ring-1 ring-accent/20">
+              K
+            </div>
+            <span className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-background bg-emerald-500" />
           </div>
-          <span className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-background bg-emerald-500" />
-        </div>
         <div className="space-y-1">
           <h1 className="text-xl font-semibold tracking-tight">{greeting}</h1>
           <p className="max-w-sm text-sm text-muted-foreground">{subline}</p>
@@ -996,7 +1016,7 @@ function EmptyState({ cards, chips, onCardClick, onChipClick, userCtx }: EmptySt
             key={chip.prompt}
             type="button"
             onClick={() => onChipClick(chip)}
-            className="rounded-full border border-border/60 bg-background/60 px-3 py-1.5 text-xs text-muted-foreground transition hover:border-primary/40 hover:bg-muted/40 hover:text-foreground"
+            className="rounded-full border border-border/60 bg-background/60 px-3 py-1.5 text-xs text-muted-foreground transition hover:border-accent/40 hover:bg-muted/40 hover:text-foreground"
           >
             {chip.prompt}
           </button>

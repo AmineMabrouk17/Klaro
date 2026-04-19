@@ -1,139 +1,353 @@
 import Link from 'next/link';
+import { ConsumerHero } from '@/components/marketing/consumer-hero';
+import { Section } from '@/components/marketing/section';
+import { AdvisorPhone } from '@/components/marketing/advisor-phone';
+import { FadeIn } from '@/components/motion/fade-in';
+import { Stagger, StaggerItem } from '@/components/motion/stagger';
+import { CountUp } from '@/components/motion/count-up';
 
 export default function HomePage() {
   return (
-    <div className="max-w-5xl mx-auto px-4">
-      {/* Hero */}
-      <section className="text-center pt-20 pb-16 space-y-8">
-        <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 text-xs font-semibold text-indigo-300 border border-indigo-500/25">
-          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
-          Alternative credit scoring for Tunisia 🇹🇳
-        </div>
+    <>
+      <ConsumerHero />
+      <StatsBar />
+      <HowItWorks />
+      <AdvisorSection />
+      <SignalsBreakdown />
+      <UseCases />
+      <ReassuranceStrip />
+      <ConsumerCTA />
+    </>
+  );
+}
 
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
-          Your real financial story.
-          <br />
-          <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-blue-400 bg-clip-text text-transparent">
-            Scored fairly.
-          </span>
-        </h1>
-
-        <p className="text-lg text-white/50 max-w-xl mx-auto leading-relaxed">
-          Klaro builds a transparent, AI-powered credit score from your KYC, bank activity, and
-          payment behavior — without the credit bureau gatekeeping.
-        </p>
-
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-          <Link
-            href="/register"
-            className="w-full sm:w-auto px-8 py-3.5 rounded-2xl text-base font-bold bg-indigo-600 hover:bg-indigo-500 text-white btn-glow transition-all"
-          >
-            Get my score 📊
-          </Link>
-          <Link
-            href="/login"
-            className="w-full sm:w-auto px-8 py-3.5 rounded-2xl text-base font-semibold glass border border-white/12 text-white/70 hover:text-white hover:bg-white/10 transition-all"
-          >
-            I have an account
-          </Link>
-        </div>
-
-        {/* Social proof */}
-        <p className="text-xs text-white/25">
-          🔒 Your documents never leave our infrastructure
-        </p>
-      </section>
-
-      {/* Score preview card */}
-      <section className="flex justify-center pb-16">
-        <div className="glass-card-strong p-6 w-full max-w-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-widest text-white/40">Your Klaro Score</span>
-            <span className="text-xs glass px-2 py-1 rounded-full text-white/50">0–1000</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="relative w-20 h-20 shrink-0">
-              <svg viewBox="0 0 36 36" className="w-20 h-20 -rotate-90">
-                <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="3" />
-                <circle
-                  cx="18" cy="18" r="15.9" fill="none"
-                  stroke="hsl(25 95% 53%)"
-                  strokeWidth="3"
-                  strokeDasharray="65 100"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-xl font-black text-orange-400">410</span>
-                <span className="text-[9px] text-white/40 uppercase tracking-wide">FAIR</span>
-              </div>
-            </div>
-            <div className="flex-1 space-y-2">
-              {[
-                { label: 'Income stability', pct: 35 },
-                { label: 'Payment behavior', pct: 30 },
-                { label: 'Document quality', pct: 72 },
-              ].map((item) => (
-                <div key={item.label} className="space-y-1">
-                  <div className="flex justify-between text-[10px] text-white/40">
-                    <span>{item.label}</span>
-                    <span>{item.pct}%</span>
-                  </div>
-                  <div className="h-1 rounded-full bg-white/8">
-                    <div
-                      className="h-full rounded-full bg-indigo-500"
-                      style={{ width: `${item.pct}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="pt-2 border-t border-white/8 text-xs text-white/35 text-center">
-            Connect your bank to unlock +120 pts 📈
-          </div>
-        </div>
-      </section>
-
-      {/* Feature cards */}
-      <section className="grid gap-4 sm:grid-cols-3 pb-20">
-        {[
-          {
-            emoji: '🪪',
-            title: 'Own your KYC',
-            body: 'Open-source pipeline (PaddleOCR, MTCNN, AdaFace, MediaPipe). Your documents stay on our infrastructure — never sold.',
-          },
-          {
-            emoji: '🏦',
-            title: 'Real bank insights',
-            body: 'Connect your bank or upload statements. Klaro normalizes, categorizes, and scores — transparently and in seconds.',
-          },
-          {
-            emoji: '🤖',
-            title: 'AI advisor',
-            body: 'A Claude-powered financial advisor that understands your spending patterns and tells you exactly what to fix.',
-          },
-        ].map((f) => (
-          <div key={f.title} className="glass-card p-6 space-y-3">
-            <div className="text-3xl">{f.emoji}</div>
-            <h3 className="font-bold text-white">{f.title}</h3>
-            <p className="text-sm text-white/45 leading-relaxed">{f.body}</p>
-          </div>
-        ))}
-      </section>
-
-      {/* Bottom CTA */}
-      <section className="glass-card-strong p-8 text-center space-y-4 mb-16">
-        <div className="text-4xl">🚀</div>
-        <h2 className="text-2xl font-black text-white">Ready to know your score?</h2>
-        <p className="text-sm text-white/45">Takes 5 minutes. Free to start.</p>
-        <Link
-          href="/register"
-          className="inline-block px-8 py-3.5 rounded-2xl font-bold bg-indigo-600 hover:bg-indigo-500 text-white btn-glow transition-all"
+function StatsBar() {
+  const stats = [
+    { kind: 'static' as const, value: '5 min', label: 'To your first score' },
+    { kind: 'count' as const, to: 0, suffix: ' TND', label: 'Cost to start' },
+    { kind: 'count' as const, to: 1000, label: 'Score scale' },
+    { kind: 'static' as const, value: 'Yours', label: 'Who owns the data' },
+  ];
+  return (
+    <div className="hairline-t hairline-b">
+      <div className="mx-auto max-w-6xl px-6">
+        <Stagger
+          stagger={0.06}
+          className="grid grid-cols-2 gap-px bg-white/[0.06] sm:grid-cols-4"
         >
-          Get started — it&apos;s free 🎯
-        </Link>
-      </section>
+          {stats.map((s) => (
+            <StaggerItem key={s.label}>
+              <div className="bg-[hsl(var(--marketing-bg))] py-7 px-4 h-full">
+                <div className="mono text-2xl sm:text-3xl font-semibold tracking-tight text-white tabular-nums">
+                  {s.kind === 'count' ? (
+                    <CountUp to={s.to} suffix={s.suffix} />
+                  ) : (
+                    s.value
+                  )}
+                </div>
+                <div className="mt-1 mono text-[10px] tracking-[0.18em] uppercase text-white/40">
+                  {s.label}
+                </div>
+              </div>
+            </StaggerItem>
+          ))}
+        </Stagger>
+      </div>
     </div>
+  );
+}
+
+function HowItWorks() {
+  const steps = [
+    {
+      n: '01',
+      title: 'Prove who you are',
+      body: 'Snap your CIN and do a quick selfie check. We confirm it’s really you in under a minute, with no third-party KYC vendor in the loop.',
+      tag: '60 seconds',
+    },
+    {
+      n: '02',
+      title: 'Connect your bank',
+      body: 'Link your account or upload your last 3 statements. Klaro reads your salary, your spending, your savings — and translates them into signals you can see.',
+      tag: 'Read-only access',
+    },
+    {
+      n: '03',
+      title: 'See your real score',
+      body: 'A clear 0–1000 score with the exact reasons behind it. Then ask the AI advisor what to fix this month to push it higher.',
+      tag: 'Yours forever',
+    },
+  ];
+
+  return (
+    <Section
+      index="01"
+      eyebrow="How it works"
+      title="From phone to score in five minutes."
+      description="No bureaus. No paperwork. Just the financial story you already live every day, finally counted."
+      className="hairline-b"
+    >
+      <Stagger
+        id="how"
+        stagger={0.08}
+        className="grid gap-px bg-white/[0.06] hairline"
+      >
+        {steps.map((s) => (
+          <StaggerItem key={s.n}>
+            <article className="bg-[hsl(var(--marketing-bg))] p-7 marketing-card-hover sm:grid sm:grid-cols-[auto_1fr_auto] sm:items-start sm:gap-8">
+              <div className="mono text-[11px] tracking-[0.2em] text-white/40 sm:pt-1">
+                {s.n}
+              </div>
+              <div className="mt-2 sm:mt-0">
+                <h3 className="text-xl font-medium text-white">{s.title}</h3>
+                <p className="mt-2 text-[14px] leading-relaxed text-white/55 max-w-xl">
+                  {s.body}
+                </p>
+              </div>
+              <div className="mt-3 sm:mt-1 mono text-[10px] tracking-[0.16em] uppercase text-white/40 hairline rounded-full px-2.5 py-1 inline-flex">
+                {s.tag}
+              </div>
+            </article>
+          </StaggerItem>
+        ))}
+      </Stagger>
+    </Section>
+  );
+}
+
+function SignalsBreakdown() {
+  const layers = [
+    {
+      label: 'Who you are',
+      weight: '15%',
+      desc: 'A verified identity — not just a name on paper. Real ID + real selfie + liveness check.',
+    },
+    {
+      label: 'How you earn',
+      weight: '30%',
+      desc: 'How regular your income is. How many sources. How steady it’s been over the last 6 months.',
+    },
+    {
+      label: 'How you handle money',
+      weight: '35%',
+      desc: 'Bills paid on time. Recurring obligations honored. Spending that lines up with what you make.',
+    },
+    {
+      label: 'How stable you are',
+      weight: '20%',
+      desc: 'A buffer at month-end. A bank you’ve been with for a while. A life that isn’t lurching every few weeks.',
+    },
+  ];
+
+  return (
+    <Section
+      index="03"
+      eyebrow="What we score"
+      title="Four layers. Zero black boxes."
+      description="Every point in your score traces back to a signal you can see, audit, and improve."
+      className="hairline-b"
+    >
+      <Stagger
+        stagger={0.06}
+        className="grid gap-px bg-white/[0.06] hairline sm:grid-cols-2"
+      >
+        {layers.map((l) => (
+          <StaggerItem key={l.label}>
+            <div className="bg-[hsl(var(--marketing-bg))] p-6 marketing-card-hover h-full">
+              <div className="flex items-baseline justify-between">
+                <h3 className="text-[15px] font-medium text-white">{l.label}</h3>
+                <span className="mono text-2xl font-semibold tabular-nums text-white">
+                  {l.weight}
+                </span>
+              </div>
+              <p className="mt-2 text-[13.5px] leading-relaxed text-white/50">
+                {l.desc}
+              </p>
+            </div>
+          </StaggerItem>
+        ))}
+      </Stagger>
+    </Section>
+  );
+}
+
+function AdvisorSection() {
+  return (
+    <Section
+      index="02"
+      eyebrow="The advisor"
+      title="Don’t just see your score. Improve it."
+      description="A built-in AI advisor that explains exactly what’s holding you back and gives you a 60-day plan written in plain language. Not a hotline. Not a quiz. A coach in your pocket."
+      align="center"
+      className="hairline-b"
+    >
+      <FadeIn className="mt-2">
+        <div className="relative mx-auto flex max-w-5xl flex-col items-center gap-12 lg:gap-16">
+          <div className="relative">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 -z-10 mx-auto h-[520px] w-[520px] -translate-y-6 rounded-full bg-[radial-gradient(ellipse_at_center,_rgba(255,122,69,0.10),_transparent_60%)] blur-2xl"
+            />
+            <AdvisorPhone />
+          </div>
+
+          <Stagger
+            stagger={0.08}
+            className="grid w-full gap-px bg-white/[0.06] hairline sm:grid-cols-3"
+          >
+            {[
+              {
+                label: 'Asks like a friend',
+                body: 'Talk in your own words — Arabic, French, English. The advisor understands all three.',
+              },
+              {
+                label: 'Explains every number',
+                body: 'Tap any signal in your score and it tells you exactly why it landed there.',
+              },
+              {
+                label: 'Gives you the next move',
+                body: 'A short, doable plan for this month. No “build credit history,” no boilerplate.',
+              },
+            ].map((b) => (
+              <StaggerItem key={b.label}>
+                <div className="h-full bg-[hsl(var(--marketing-bg))] p-6">
+                  <div className="mono text-[10px] tracking-[0.18em] uppercase text-white/40">
+                    {b.label}
+                  </div>
+                  <p className="mt-2 text-[14px] leading-relaxed text-white/65">
+                    {b.body}
+                  </p>
+                </div>
+              </StaggerItem>
+            ))}
+          </Stagger>
+        </div>
+      </FadeIn>
+    </Section>
+  );
+}
+
+function UseCases() {
+  const cases = [
+    {
+      tag: 'Loans',
+      title: 'Apply for credit without the runaround',
+      body: 'Walk into a partner bank with a verified Klaro score and skip the “bring 6 months of statements” loop.',
+    },
+    {
+      tag: 'Renting',
+      title: 'Prove you can afford the apartment',
+      body: 'Share a one-page Klaro report instead of paystubs and family guarantees. Landlords get a number they trust.',
+    },
+    {
+      tag: 'Freelancers',
+      title: 'Finally get scored on what you actually earn',
+      body: 'Multiple clients, mixed currencies, no fixed paycheck — Klaro models real income, not just W2-shaped lives.',
+    },
+    {
+      tag: 'Visas & abroad',
+      title: 'Build a financial story that travels',
+      body: 'A portable, signed proof of identity and income — useful when an embassy or a foreign bank asks who you are.',
+    },
+  ];
+
+  return (
+    <Section
+      index="04"
+      eyebrow="What it unlocks"
+      title="A score is the easy part. Doors open are the point."
+      description="Klaro turns the financial life you already live into proof you can hand to the people gatekeeping the things you want."
+      className="hairline-b"
+    >
+      <Stagger
+        stagger={0.06}
+        className="grid gap-px bg-white/[0.06] hairline sm:grid-cols-2"
+      >
+        {cases.map((c) => (
+          <StaggerItem key={c.title}>
+            <article className="group h-full bg-[hsl(var(--marketing-bg))] p-7 marketing-card-hover">
+              <div className="mono text-[10.5px] tracking-[0.2em] uppercase text-[hsl(var(--marketing-accent))]">
+                {c.tag}
+              </div>
+              <h3 className="mt-3 text-[18px] font-medium leading-snug text-white">
+                {c.title}
+              </h3>
+              <p className="mt-2 text-[13.5px] leading-relaxed text-white/55">
+                {c.body}
+              </p>
+            </article>
+          </StaggerItem>
+        ))}
+      </Stagger>
+    </Section>
+  );
+}
+
+function ReassuranceStrip() {
+  const items = [
+    { label: 'Read-only', body: 'We can see your transactions. We can never move money.' },
+    { label: 'Encrypted', body: 'Your statements live behind keys only you can authorize.' },
+    { label: 'Revocable', body: 'Disconnect any bank in one tap. Data deleted on request.' },
+    { label: 'Auditable', body: 'Every score has a paper trail. You can see how it was built.' },
+  ];
+  return (
+    <section className="hairline-b">
+      <FadeIn className="mx-auto max-w-6xl px-6 py-12">
+        <div className="grid gap-x-10 gap-y-6 sm:grid-cols-2 lg:grid-cols-4">
+          {items.map((it) => (
+            <div key={it.label} className="space-y-1.5">
+              <div className="mono text-[10.5px] tracking-[0.2em] uppercase text-white/45">
+                {it.label}
+              </div>
+              <p className="text-[13.5px] leading-relaxed text-white/65">
+                {it.body}
+              </p>
+            </div>
+          ))}
+        </div>
+      </FadeIn>
+    </section>
+  );
+}
+
+function ConsumerCTA() {
+  return (
+    <section className="relative">
+      <FadeIn className="mx-auto max-w-6xl px-6 py-24">
+        <div className="hairline rounded-2xl p-10 sm:p-14 bg-white/[0.02] relative overflow-hidden">
+          <div
+            aria-hidden
+            className="absolute -top-24 -right-20 h-64 w-64 rounded-full bg-[hsl(var(--marketing-accent))] opacity-[0.07] blur-3xl"
+          />
+          <div className="relative grid gap-6 sm:grid-cols-[1fr_auto] sm:items-end">
+            <div className="space-y-3">
+              <span className="mono text-[10.5px] tracking-[0.2em] uppercase text-white/45">
+                Ready when you are
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white">
+                Know your real score.
+                <br />
+                <span className="text-white/45">In five minutes. Free to start.</span>
+              </h2>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/register"
+                className="btn-mark-primary inline-flex items-center gap-2 px-5 py-3 text-[14px] font-medium"
+              >
+                Get my score
+                <span aria-hidden>→</span>
+              </Link>
+              <Link
+                href="/login"
+                className="btn-mark-ghost inline-flex items-center gap-2 px-5 py-3 text-[14px] font-medium"
+              >
+                I have an account
+              </Link>
+            </div>
+          </div>
+        </div>
+      </FadeIn>
+    </section>
   );
 }

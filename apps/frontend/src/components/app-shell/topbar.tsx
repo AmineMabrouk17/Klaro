@@ -1,6 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { LogOut } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 interface Props {
@@ -18,20 +20,27 @@ export function Topbar({ email }: Props) {
   }
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between px-4 border-b border-white/8 glass-strong lg:pl-6">
-      {/* Mobile logo */}
-      <span className="lg:hidden text-lg font-black tracking-tighter text-white">Klaro</span>
+    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between px-4 hairline-b bg-[hsl(var(--marketing-bg))]/85 backdrop-blur-md lg:pl-6">
+      <span className="lg:hidden text-[15px] font-semibold tracking-tight text-white">
+        Klaro
+      </span>
 
-      {/* Email — desktop only */}
-      <div className="hidden lg:block text-sm text-white/40 font-mono">{email}</div>
+      <div className="hidden lg:flex items-center gap-2">
+        <span className="status-dot" />
+        <span className="mono text-[11px] tracking-[0.16em] uppercase text-white/55">
+          {email ?? 'signed in'}
+        </span>
+      </div>
 
-      <button
+      <motion.button
+        whileHover={{ y: -1 }}
+        whileTap={{ y: 0 }}
         onClick={signOut}
-        className="flex items-center gap-1.5 glass rounded-xl px-3 py-1.5 text-xs font-medium text-white/60 hover:text-white hover:bg-white/10 transition-all"
+        className="flex items-center gap-1.5 rounded-md px-3 py-1.5 mono text-[11px] tracking-[0.16em] uppercase text-white/55 hover:text-white hairline hover:bg-white/[0.04] transition-colors"
       >
+        <LogOut className="h-3.5 w-3.5" strokeWidth={1.6} />
         <span>Sign out</span>
-        <span>👋</span>
-      </button>
+      </motion.button>
     </header>
   );
 }

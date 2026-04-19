@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
   TrendingUp,
@@ -9,6 +10,7 @@ import {
   FileCheck,
   Activity,
   Trophy,
+  ArrowRight,
 } from 'lucide-react';
 import { cn } from '@klaro/ui/cn';
 import type { ScoreAction, ScoreActionCategory } from '@klaro/shared';
@@ -116,6 +118,7 @@ function ActionCard({
   onMouseLeave: () => void;
 }) {
   const prefersReduced = useReducedMotion();
+  const router = useRouter();
   const meta = CATEGORY_META[action.category] ?? CATEGORY_META.behavior;
   const Icon = meta.icon;
 
@@ -125,9 +128,18 @@ function ActionCard({
     !prefersReduced,
   );
 
+  function handleClick() {
+    const prompt = encodeURIComponent(
+      `Help me with: ${action.title}. ${action.rationale}`,
+    );
+    router.push(`/chat?q=${prompt}`);
+  }
+
   return (
-    <motion.div
+    <motion.button
       key={action.id}
+      type="button"
+      onClick={handleClick}
       initial={prefersReduced ? false : { opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: index * 0.06, ease: 'easeOut' }}
@@ -136,8 +148,8 @@ function ActionCard({
       onMouseLeave={onMouseLeave}
       className={cn(
         'group relative flex flex-col gap-3 overflow-hidden rounded-xl border border-border/60',
-        'bg-card p-4 transition-shadow duration-300',
-        'hover:shadow-xl',
+        'bg-card p-4 transition-shadow duration-300 text-left w-full cursor-pointer',
+        'hover:shadow-xl hover:border-border',
         meta.glow,
       )}
     >
@@ -175,7 +187,17 @@ function ActionCard({
       <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
         {action.rationale}
       </p>
-    </motion.div>
+
+      {/* CTA */}
+      <div className={cn(
+        'mt-auto flex items-center gap-1 text-xs font-medium opacity-0 translate-y-1 transition-all duration-200',
+        'group-hover:opacity-100 group-hover:translate-y-0',
+        meta.color,
+      )}>
+        Ask AI advisor
+        <ArrowRight className="h-3 w-3" />
+      </div>
+    </motion.button>
   );
 }
 

@@ -1136,19 +1136,28 @@ export default function DocumentsPage() {
         </div>
       )}
 
-      {/* Post-upload continue CTA — shown when coming from onboarding and just uploaded */}
-      {fromOnboarding && justUploaded && (
+      {/* Post-upload / post-processing continue CTA */}
+      {fromOnboarding && (justUploaded || statements.some((s) => s.status === 'processed')) && (
         <div className="glass-card-strong p-4 flex items-center gap-3 border border-green-500/25">
           <span className="text-2xl shrink-0">✅</span>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-white text-sm">Document uploaded! Ready to see your score?</p>
-            <p className="text-xs text-white/45">Processing in the background — you can continue</p>
+            {statements.some((s) => s.status === 'processed') ? (
+              <>
+                <p className="font-semibold text-white text-sm">Document verified! Ready to see your score?</p>
+                <p className="text-xs text-white/45">Your data has been processed — view your Klaro score</p>
+              </>
+            ) : (
+              <>
+                <p className="font-semibold text-white text-sm">Document uploaded! Ready to see your score?</p>
+                <p className="text-xs text-white/45">Processing in the background — you can continue</p>
+              </>
+            )}
           </div>
           <button
             onClick={() => router.push('/dashboard')}
             className="shrink-0 px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white btn-glow transition-all"
           >
-            Continue →
+            {statements.some((s) => s.status === 'processed') ? 'See my score →' : 'Continue →'}
           </button>
         </div>
       )}

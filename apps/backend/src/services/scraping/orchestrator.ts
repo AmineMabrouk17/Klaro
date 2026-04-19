@@ -6,6 +6,7 @@ import { BiatAdapter } from './adapters/biat';
 import { UbciAdapter } from './adapters/ubci';
 import { logger } from '../../lib/logger';
 import { computeAndPersistScore } from '../score.service';
+import { supabaseAdmin } from '../supabase';
 
 const REGISTRY: Record<string, () => BankAdapter> = {
   attijari: () => new AttijariAdapter(),
@@ -27,6 +28,8 @@ export interface ScrapeJob {
   startedAt: number;
   status: ScrapeStatus;
   error?: string;
+  /** DB row id for the bank_connections record, set once inserted. */
+  bankConnectionId?: string;
   /** Resolves the suspended OTP promise so the Playwright session can continue. */
   otpResolver?: (otp: string) => void;
 }
@@ -47,6 +50,61 @@ export function submitJobOtp(jobId: string, otp: string): boolean {
   job.otpResolver(otp);
   job.otpResolver = undefined;
   return true;
+}
+
+// ---------------------------------------------------------------------------
+// bank_connections helpers
+// ---------------------------------------------------------------------------
+
+async function upsertBankConnection(
+  userId: string,
+  bankId: string,
+  syncStatus: 'syncing' | 'success' | 'failed',
+  existingId?: string,
+): Promise<string | undefined> {
+  if (existingId) {
+    await supabaseAdmin
+      .from('bank_connections')
+      .update({
+        sync_status: syncStatus,
+        ...(syncStatus === 'success' ? { last_sync_at: new Date().toISOString() } : {}),
+      })
+      .eq('id', existingId);
+    return existingId;
+  }
+
+  // Check for an existing row for this user + bank first
+  const { data: existing } = await supabaseAdmin
+    .from('bank_connections')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('bank_name', bankId)
+    .maybeSingle();
+
+  if (existing?.id) {
+    await supabaseAdmin
+      .from('bank_connections')
+      .update({
+        sync_status: syncStatus,
+        ...(syncStatus === 'success' ? { last_sync_at: new Date().toISOString() } : {}),
+      })
+      .eq('id', existing.id);
+    return existing.id;
+  }
+
+  const { data: inserted } = await supabaseAdmin
+    .from('bank_connections')
+    .insert({
+      user_id: userId,
+      bank_name: bankId,
+      connection_method: 'scraping',
+      sync_status: syncStatus,
+      ...(syncStatus === 'success' ? { last_sync_at: new Date().toISOString() } : {}),
+    })
+    .select('id')
+    .single();
+
+  return inserted?.id;
 }
 
 // ---------------------------------------------------------------------------
@@ -111,13 +169,31 @@ export function startScrapeJob(userId: string, bankId: string, credentials: Bank
   // Run asynchronously – do not await
   (async () => {
     job.status = 'running';
+
+    // Record the connection attempt in the DB immediately
+    try {
+      job.bankConnectionId = await upsertBankConnection(userId, bankId, 'syncing');
+    } catch (err) {
+      logger.warn({ err, jobId, bankId }, 'bank_connections insert failed — continuing anyway');
+    }
+
     try {
       await runScrape(userId, bankId, otpAwareCredentials);
       job.status = 'success';
+
+      // Mark connection as successful in the DB
+      await upsertBankConnection(userId, bankId, 'success', job.bankConnectionId).catch((err) =>
+        logger.warn({ err, jobId }, 'bank_connections success update failed'),
+      );
     } catch (err) {
       job.status = 'failed';
       job.error = err instanceof Error ? err.message : String(err);
       logger.error({ err, jobId, bankId }, 'scrape job failed');
+
+      // Mark connection as failed in the DB
+      await upsertBankConnection(userId, bankId, 'failed', job.bankConnectionId).catch((e) =>
+        logger.warn({ err: e, jobId }, 'bank_connections failed update failed'),
+      );
     }
   })();
 

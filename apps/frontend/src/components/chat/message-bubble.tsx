@@ -20,7 +20,7 @@ export function MessageBubble({ role, content, streaming, attachment }: Props) {
       {!isUser && (
         <div
           aria-hidden
-          className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 text-[11px] font-semibold text-white shadow-sm ring-1 ring-white/10"
+          className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-background border border-white/10 text-[11px] font-semibold text-white shadow-sm ring-1 ring-accent/20"
         >
           K
         </div>
@@ -122,7 +122,7 @@ export function MessageBubble({ role, content, streaming, attachment }: Props) {
                   {content}
                 </ReactMarkdown>
                 {streaming && content && (
-                  <span className="ml-0.5 inline-block h-3 w-[2px] animate-pulse bg-foreground/60 align-middle" />
+                  <span className="ml-0.5 inline-block h-3 w-[2px] animate-pulse bg-accent/80 align-middle" />
                 )}
               </div>
             )}
@@ -170,9 +170,9 @@ function AttachmentView({
 function TypingDots() {
   return (
     <span className="inline-flex items-center gap-1 py-1" aria-label="Klaro is typing">
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/70 [animation-delay:-0.3s]" />
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/70 [animation-delay:-0.15s]" />
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/70" />
+      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent/70 [animation-delay:-0.3s]" />
+      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent/70 [animation-delay:-0.15s]" />
+      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent/70" />
     </span>
   );
 }

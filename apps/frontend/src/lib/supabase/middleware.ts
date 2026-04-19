@@ -2,7 +2,14 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import type { Database } from '@klaro/shared';
 import { NextResponse, type NextRequest } from 'next/server';
 
-const PUBLIC_PATHS = ['/', '/login', '/register', '/verify-email', '/api/auth/callback'];
+const PUBLIC_PATHS = [
+  '/',
+  '/partners',
+  '/login',
+  '/register',
+  '/verify-email',
+  '/api/auth/callback',
+];
 
 // Paths that are part of the onboarding flow — don't gate them
 const ONBOARDING_PATHS = ['/kyc', '/onboarding', '/connect-bank', '/documents'];
