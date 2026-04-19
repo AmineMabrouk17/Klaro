@@ -23,13 +23,17 @@ _KNOWN_FIELDS = (
     "expiry_date",
     "address",
     "gender",
+    "occupation",
+    "father_name",
+    "mother_name",
+    "place_of_birth",
 )
 
 _SYSTEM_PROMPT = """\
 You are a highly accurate identity-document reader specialised in Tunisian CIN
 (Carte d'Identité Nationale), passports, and driver licences.
 
-Your task is to look at the document image and extract the fields below.
+Your task is to look at the document image(s) and extract the fields below.
 Return ONLY valid JSON — no markdown fences, no explanations, nothing else.
 
 ANTI-HALLUCINATION RULES — read these first:
@@ -44,13 +48,31 @@ ANTI-HALLUCINATION RULES — read these first:
   all-null solely because of orientation.
 
 IMPORTANT rules for Tunisian CINs:
-- The card has two main name fields:
-    اللقب  (family/last name)
-    الاسم  (given/first name)
-  Concatenate them as  "given_name family_name"  for full_name.
-- "بن" / "ابن" (son of) and "بنت" / "ابنة" (daughter of) are document-structure
-  labels that appear before the father's name. Do NOT include them in full_name.
-  They indicate gender (M / F respectively).
+- The card has two name fields:
+    اللقب  (family / last name)
+    الاسم  (given name field — but it encodes the full paternal chain)
+
+  The الاسم field follows this exact structure:
+      [given_name] بن [father_name] بن [grandfather_name]   (male holder)
+      [given_name] بنت [father_name] بن [grandfather_name]  (female holder)
+
+  Rules derived from this structure:
+  ① full_name  = ONLY the text that appears BEFORE the first "بن" or "بنت"
+                 in الاسم (i.e. the holder's own given name), combined with
+                 اللقب (family name).
+                 Format: "<given_name> <family_name>"
+                 NEVER include بن / بنت or anything after them in full_name.
+  ② father_name = the text that appears BETWEEN the first "بن/بنت" and the
+                  SECOND "بن" (i.e. the first name of the holder's father).
+                  Transliterate to Latin script.
+  ③ gender: "M" if the connector is "بن" (son of), "F" if "بنت" (daughter of).
+             Also check ذكر / أنثى labels if present.
+
+  Example — الاسم: "أمين بن الشاذلي بن محمد", اللقب: "بن علي"
+    → full_name      = "أمين بن علي"
+    → full_name_latin = "Amine Ben Ali"
+    → father_name    = "Elchadhli"   (transliterated الشاذلي)
+    → gender         = "M"
 - full_name_latin: always provide a Latin-script version.
   If it is printed on the card, use it verbatim.
   Otherwise transliterate using standard Tunisian romanisation:
@@ -70,11 +92,24 @@ IMPORTANT rules for Tunisian CINs:
   بنزرت→Bizerte, قابس→Gabes, القيروان→Kairouan, سيدي بوزيد→Sidi Bouzid,
   مدنين→Medenine, تطاوين→Tataouine, قبلي→Kebili, توزر→Tozeur,
   جندوبة→Jendouba, زغوان→Zaghouan).
-- gender: "M" if ذكر / ابن / male indicator, "F" if أنثى / ابنة / female indicator.
+- gender: "M" if ذكر / بن / male indicator, "F" if أنثى / بنت / female indicator.
+  The بن / بنت connector in الاسم is the primary signal when explicit labels are absent.
 - cin_number: 8-digit number only, no spaces or letters.
-- Use null for any field that is genuinely unreadable or absent.
 
-Output schema:
+VERSO / BACK SIDE fields (when a second image is provided or the back is visible):
+- occupation: the المهنة / Profession / Emploi field — translate to English
+  (e.g. إطار→Executive, مهندس→Engineer, أستاذ→Teacher, طبيب→Doctor,
+   موظف→Civil servant, تاجر→Merchant, عامل→Worker, طالب→Student,
+   متقاعد→Retired, بدون مهنة→Unemployed).
+- father_name: extracted from the الاسم field on the recto (see rules above).
+  If a verso is provided and اسم الأب is printed there, use that as a fallback
+  or to confirm the recto extraction. Transliterate to Latin script.
+- mother_name: اسم الأم — transliterate to Latin script.
+- place_of_birth: مكان الولادة — translate/transliterate to English using the
+  same city mapping as address.
+- Use null for any of these if absent or unreadable.
+
+Output schema (return null for missing/unreadable fields):
 {
   "full_name": "<Arabic given + family name, no بن/بنت>",
   "full_name_latin": "<Latin transliteration or printed name>",
@@ -82,7 +117,11 @@ Output schema:
   "date_of_birth": "<YYYY-MM-DD>",
   "expiry_date": "<YYYY-MM-DD>",
   "address": "<English address>",
-  "gender": "<M or F>"
+  "gender": "<M or F>",
+  "occupation": "<English occupation or null>",
+  "father_name": "<Latin transliteration or null>",
+  "mother_name": "<Latin transliteration or null>",
+  "place_of_birth": "<English city/place or null>"
 }
 """
 
@@ -92,14 +131,13 @@ def extract_fields_via_vision(
     document_type: str,
     settings: Settings,
     quality_score: float = 1.0,
+    verso_bytes: bytes | None = None,
 ) -> tuple[dict[str, str | None], float]:
-    """Send the document image to Claude Haiku vision and return (fields, confidence).
+    """Send the document image(s) to Claude Haiku vision and return (fields, confidence).
 
-    This replaces the PaddleOCR → text → Haiku text pipeline with a single
-    vision call that reads the document directly, yielding far better accuracy
-    on stylised Arabic card text, tilted images, and glare.
-
-    Falls back to an empty dict with confidence 0.0 on any API error.
+    When `verso_bytes` is supplied the back side of the document is included as
+    a second image in the same API call, allowing Claude to extract verso-only
+    fields (occupation, father/mother names, place of birth) in one pass.
     """
     if not settings.ANTHROPIC_API_KEY:
         logger.error("ANTHROPIC_API_KEY not set; cannot call Claude Vision.")
@@ -112,37 +150,64 @@ def extract_fields_via_vision(
 
     client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
 
-    # Detect MIME type from magic bytes
-    mime = "image/jpeg"
-    if image_bytes[:4] == b"\x89PNG":
-        mime = "image/png"
-    elif image_bytes[:4] == b"RIFF" or image_bytes[:4] == b"WEBP":
-        mime = "image/webp"
+    def _mime(buf: bytes) -> str:
+        if buf[:4] == b"\x89PNG":
+            return "image/png"
+        if buf[:4] in (b"RIFF", b"WEBP"):
+            return "image/webp"
+        return "image/jpeg"
 
-    b64_image = base64.standard_b64encode(image_bytes).decode("ascii")
+    def _img_block(buf: bytes) -> dict:
+        return {
+            "type": "image",
+            "source": {
+                "type": "base64",
+                "media_type": _mime(buf),
+                "data": base64.standard_b64encode(buf).decode("ascii"),
+            },
+        }
+
     _empty: dict[str, str | None] = {k: None for k in _KNOWN_FIELDS}
 
-    user_content = [
-        {
-            "type": "image",
-            "source": {"type": "base64", "media_type": mime, "data": b64_image},
-        },
-        {
-            "type": "text",
-            "text": (
-                f"document_type: {document_type}\n"
-                f"image_quality_score: {quality_score:.2f} (0=unusable, 1=perfect)\n\n"
-                + (
-                    "WARNING: Image quality is marginal. Be extra conservative — "
-                    "return null for any field you cannot read with full confidence. "
-                    "Do NOT guess.\n\n"
-                    if quality_score < 0.5
-                    else ""
-                )
-                + "Extract all KYC fields from this document image."
-            ),
-        },
-    ]
+    quality_warning = (
+        "WARNING: Image quality is marginal. Be extra conservative — "
+        "return null for any field you cannot read with full confidence. "
+        "Do NOT guess.\n\n"
+        if quality_score < 0.5
+        else ""
+    )
+
+    if verso_bytes:
+        user_content = [
+            {"type": "text", "text": "FRONT SIDE (Recto):"},
+            _img_block(image_bytes),
+            {"type": "text", "text": "BACK SIDE (Verso):"},
+            _img_block(verso_bytes),
+            {
+                "type": "text",
+                "text": (
+                    f"document_type: {document_type}\n"
+                    f"image_quality_score: {quality_score:.2f} (0=unusable, 1=perfect)\n\n"
+                    + quality_warning
+                    + "Extract all KYC fields from both sides of this document. "
+                    "The front contains the photo and personal details; "
+                    "the back contains occupation, parents' names, and place of birth."
+                ),
+            },
+        ]
+    else:
+        user_content = [
+            _img_block(image_bytes),
+            {
+                "type": "text",
+                "text": (
+                    f"document_type: {document_type}\n"
+                    f"image_quality_score: {quality_score:.2f} (0=unusable, 1=perfect)\n\n"
+                    + quality_warning
+                    + "Extract all KYC fields from this document image."
+                ),
+            },
+        ]
 
     try:
         message = client.messages.create(

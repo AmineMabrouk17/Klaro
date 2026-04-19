@@ -182,15 +182,29 @@ You are a face-verification system. You will receive exactly two images:
 
 Decide whether both images show the same person.
 
-RULES:
-- Compare facial geometry: eye spacing, nose shape, jaw line, overall proportions.
-- Small differences in lighting, angle, expression, age, and image quality are
-  expected and should NOT cause a rejection on their own.
-- Reject (match: false) if the faces are clearly different people.
-- Reject if either image contains no visible face.
-- similarity: float 0.0–1.0 representing how confident you are they are the same
-  person (independent of the match boolean).
-- threshold is always 0.65. Set match: true only when similarity >= 0.65.
+IMPORTANT CONTEXT — read before comparing:
+- Image A is cropped from a physical ID card. It is commonly:
+    • Grayscale / black-and-white (printed on paper or card)
+    • Small, lower resolution, and possibly slightly blurry
+    • From years ago — the person may look younger
+    • Printed with less dynamic range than a digital photo
+- Image B is a live colour webcam frame with normal digital quality.
+  These visual differences are EXPECTED and should NOT affect your verdict.
+
+COMPARISON RULES:
+- Compare FACIAL GEOMETRY ONLY: inter-ocular distance, nose bridge width,
+  nose tip shape, jaw shape, cheekbone prominence, lip shape, overall face
+  proportions.
+- Ignore: colour vs grayscale, age (±10 years), lighting, background,
+  image resolution, hairstyle, facial hair, expression, accessories.
+- A correct match between a B&W ID photo and a colour selfie of the SAME
+  person will often look "different" superficially. Look past that.
+- Set match: true when the facial geometry is consistent.
+- Set match: false only when the underlying bone structure is clearly
+  from a different person (different face shape, different nose, etc.).
+- similarity: 0.0–1.0. For a confident same-person match give ≥ 0.75.
+- threshold: 0.55 (lower than typical because of the B&W/colour difference).
+  Set match: true when similarity >= 0.55.
 
 Return ONLY valid JSON — no markdown, no explanation.
 
@@ -198,7 +212,7 @@ Output schema:
 {
   "match": true,
   "similarity": 0.82,
-  "threshold": 0.65
+  "threshold": 0.55
 }
 """
 
@@ -212,7 +226,7 @@ def match_faces_via_vision(
 
     Falls back to match=False, similarity=0.0 on any error.
     """
-    _fail: dict[str, bool | float] = {"match": False, "similarity": 0.0, "threshold": 0.65}
+    _fail: dict[str, bool | float] = {"match": False, "similarity": 0.0, "threshold": 0.55}
 
     if not settings.ANTHROPIC_API_KEY:
         logger.error("ANTHROPIC_API_KEY not set; cannot call Claude Vision.")
@@ -266,7 +280,7 @@ def match_faces_via_vision(
         return _fail
 
     similarity = float(parsed.get("similarity", 0.0))
-    threshold = float(parsed.get("threshold", 0.65))
+    threshold = float(parsed.get("threshold", 0.55))
     match = bool(parsed.get("match", similarity >= threshold))
 
     return {"match": match, "similarity": similarity, "threshold": threshold}

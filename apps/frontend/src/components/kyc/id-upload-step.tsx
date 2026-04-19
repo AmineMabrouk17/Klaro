@@ -18,11 +18,18 @@ interface ExtractedFields {
   expiry_date: string | null;
   address: string | null;
   gender: string | null;
+  occupation: string | null;
+  father_name: string | null;
+  mother_name: string | null;
+  place_of_birth: string | null;
 }
 
 type OcrResult =
   | { success: true; extracted: ExtractedFields; face_crop_base64: string; confidence: number; quality_score: number }
   | { success: false; reason: 'low_quality' | 'no_face_detected' };
+
+// Documents that have a meaningful back side worth scanning
+const HAS_VERSO = new Set<DocumentType>(['cin', 'driver_license']);
 
 type UploadState =
   | { status: 'idle' }
@@ -63,6 +70,8 @@ function DropZone({
   onDrop,
   onClick,
   inputRef,
+  label,
+  compact,
 }: {
   file: File | null;
   dragging: boolean;
@@ -72,58 +81,67 @@ function DropZone({
   onDrop: (e: React.DragEvent) => void;
   onClick: () => void;
   inputRef: React.RefObject<HTMLInputElement | null>;
+  label?: string;
+  compact?: boolean;
 }) {
   const preview = file ? URL.createObjectURL(file) : null;
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={onClick}
-      onKeyDown={(e) => e.key === 'Enter' && onClick()}
-      onDragOver={onDragOver}
-      onDragLeave={onDragLeave}
-      onDrop={onDrop}
-      className={cn(
-        'relative flex min-h-[180px] cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors',
-        dragging
-          ? 'border-primary bg-primary/5'
-          : file
-            ? 'border-border bg-muted/20'
-            : 'border-border bg-muted/10 hover:border-primary/50 hover:bg-primary/5',
+    <div className="space-y-1.5">
+      {label && (
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
       )}
-    >
-      {preview ? (
-        <img
-          src={preview}
-          alt="Document preview"
-          className="max-h-40 max-w-full rounded object-contain p-2"
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={onClick}
+        onKeyDown={(e) => e.key === 'Enter' && onClick()}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
+        onDrop={onDrop}
+        className={cn(
+          'relative flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors',
+          compact ? 'min-h-[140px]' : 'min-h-[180px]',
+          dragging
+            ? 'border-primary bg-primary/5'
+            : file
+              ? 'border-border bg-muted/20'
+              : 'border-border bg-muted/10 hover:border-primary/50 hover:bg-primary/5',
+        )}
+      >
+        {preview ? (
+          <img
+            src={preview}
+            alt="Document preview"
+            className="max-h-32 max-w-full rounded object-contain p-2"
+          />
+        ) : (
+          <div className="flex flex-col items-center gap-2 p-4 text-center">
+            <UploadIcon className="h-7 w-7 text-muted-foreground" />
+            <div>
+              <p className="text-sm font-medium">Drop here or click to browse</p>
+              <p className="text-xs text-muted-foreground mt-0.5">JPEG or PNG · max 10 MB</p>
+            </div>
+            {!compact && (
+              <div className="mt-1 grid grid-cols-2 gap-x-6 gap-y-1.5 text-left text-xs text-muted-foreground">
+                <span className="flex items-center gap-1.5"><GreenDot />Place flat on a surface</span>
+                <span className="flex items-center gap-1.5"><GreenDot />Shoot directly from above</span>
+                <span className="flex items-center gap-1.5"><GreenDot />Bright, even lighting</span>
+                <span className="flex items-center gap-1.5"><RedDot />No glare or shadows</span>
+                <span className="flex items-center gap-1.5"><RedDot />No tilt or angle</span>
+                <span className="flex items-center gap-1.5"><RedDot />No fingers covering text</span>
+              </div>
+            )}
+          </div>
+        )}
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="sr-only"
+          onChange={(e) => e.target.files && onFiles(e.target.files)}
         />
-      ) : (
-        <div className="flex flex-col items-center gap-3 p-6 text-center">
-          <UploadIcon className="h-8 w-8 text-muted-foreground" />
-          <div>
-            <p className="text-sm font-medium">Drop your document here or click to browse</p>
-            <p className="text-xs text-muted-foreground mt-0.5">JPEG or PNG · max 10 MB</p>
-          </div>
-          {/* Capture tips */}
-          <div className="mt-1 grid grid-cols-2 gap-x-6 gap-y-1.5 text-left text-xs text-muted-foreground">
-            <span className="flex items-center gap-1.5"><GreenDot />Place flat on a surface</span>
-            <span className="flex items-center gap-1.5"><GreenDot />Shoot directly from above</span>
-            <span className="flex items-center gap-1.5"><GreenDot />Bright, even lighting</span>
-            <span className="flex items-center gap-1.5"><RedDot />No glare or shadows</span>
-            <span className="flex items-center gap-1.5"><RedDot />No tilt or angle</span>
-            <span className="flex items-center gap-1.5"><RedDot />No fingers covering text</span>
-          </div>
-        </div>
-      )}
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        className="sr-only"
-        onChange={(e) => e.target.files && onFiles(e.target.files)}
-      />
+      </div>
     </div>
   );
 }
@@ -183,37 +201,39 @@ interface IdUploadStepProps {
 
 export function IdUploadStep({ onSuccess }: IdUploadStepProps) {
   const [docType, setDocType] = React.useState<DocumentType>('cin');
-  const [file, setFile] = React.useState<File | null>(null);
-  const [dragging, setDragging] = React.useState(false);
-  const [state, setState] = React.useState<UploadState>({ status: 'idle' });
-  const inputRef = React.useRef<HTMLInputElement | null>(null);
 
-  const handleFiles = (files: FileList) => {
-    const picked = files[0];
-    if (!picked) return;
-    setFile(picked);
+  // Recto (front) — always required
+  const [rectoFile, setRectoFile]     = React.useState<File | null>(null);
+  const [rectoDragging, setRectoDrag] = React.useState(false);
+  const rectoInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  // Verso (back) — only for CIN and driver_license
+  const [versoFile, setVersoFile]     = React.useState<File | null>(null);
+  const [versoDragging, setVersoDrag] = React.useState(false);
+  const versoInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  const [state, setState] = React.useState<UploadState>({ status: 'idle' });
+
+  const showVerso = HAS_VERSO.has(docType);
+
+  const handleDocTypeChange = (val: DocumentType) => {
+    setDocType(val);
+    // Clear verso if switching to a doc type that doesn't need it
+    if (!HAS_VERSO.has(val)) setVersoFile(null);
     setState({ status: 'idle' });
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragging(true);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragging(false);
-    if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
-  };
-
   const handleUpload = async () => {
-    if (!file) return;
+    if (!rectoFile) return;
     setState({ status: 'uploading' });
 
     try {
       const form = new FormData();
-      form.append('image', file, file.name);
+      form.append('image', rectoFile, rectoFile.name);
       form.append('document_type', docType);
+      if (versoFile && showVerso) {
+        form.append('image_verso', versoFile, versoFile.name);
+      }
 
       const raw = await api.post<OcrResult>('/api/kyc/upload', form);
 
@@ -234,11 +254,12 @@ export function IdUploadStep({ onSuccess }: IdUploadStepProps) {
   };
 
   const reset = () => {
-    setFile(null);
+    setRectoFile(null);
+    setVersoFile(null);
     setState({ status: 'idle' });
   };
 
-  const isSuccess = state.status === 'success';
+  const isSuccess  = state.status === 'success';
   const isUploading = state.status === 'uploading';
 
   return (
@@ -251,7 +272,7 @@ export function IdUploadStep({ onSuccess }: IdUploadStepProps) {
         <select
           id="doc-type"
           value={docType}
-          onChange={(e) => setDocType(e.target.value as DocumentType)}
+          onChange={(e) => handleDocTypeChange(e.target.value as DocumentType)}
           disabled={isUploading || isSuccess}
           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
@@ -263,18 +284,56 @@ export function IdUploadStep({ onSuccess }: IdUploadStepProps) {
         </select>
       </div>
 
-      {/* Drop zone */}
+      {/* Drop zones */}
       {!isSuccess && (
-        <DropZone
-          file={file}
-          dragging={dragging}
-          onFiles={handleFiles}
-          onDragOver={handleDragOver}
-          onDragLeave={() => setDragging(false)}
-          onDrop={handleDrop}
-          onClick={() => inputRef.current?.click()}
-          inputRef={inputRef}
-        />
+        showVerso ? (
+          /* Two-column recto / verso layout */
+          <div className="grid grid-cols-2 gap-3">
+            <DropZone
+              file={rectoFile}
+              dragging={rectoDragging}
+              label="Front side (Recto)"
+              compact
+              onFiles={(f) => { setRectoFile(f[0] ?? null); setState({ status: 'idle' }); }}
+              onDragOver={(e) => { e.preventDefault(); setRectoDrag(true); }}
+              onDragLeave={() => setRectoDrag(false)}
+              onDrop={(e) => { e.preventDefault(); setRectoDrag(false); if (e.dataTransfer.files.length) { setRectoFile(e.dataTransfer.files[0] ?? null); setState({ status: 'idle' }); } }}
+              onClick={() => rectoInputRef.current?.click()}
+              inputRef={rectoInputRef}
+            />
+            <DropZone
+              file={versoFile}
+              dragging={versoDragging}
+              label="Back side (Verso)"
+              compact
+              onFiles={(f) => { setVersoFile(f[0] ?? null); setState({ status: 'idle' }); }}
+              onDragOver={(e) => { e.preventDefault(); setVersoDrag(true); }}
+              onDragLeave={() => setVersoDrag(false)}
+              onDrop={(e) => { e.preventDefault(); setVersoDrag(false); if (e.dataTransfer.files.length) { setVersoFile(e.dataTransfer.files[0] ?? null); setState({ status: 'idle' }); } }}
+              onClick={() => versoInputRef.current?.click()}
+              inputRef={versoInputRef}
+            />
+          </div>
+        ) : (
+          /* Single drop zone for passport */
+          <DropZone
+            file={rectoFile}
+            dragging={rectoDragging}
+            onFiles={(f) => { setRectoFile(f[0] ?? null); setState({ status: 'idle' }); }}
+            onDragOver={(e) => { e.preventDefault(); setRectoDrag(true); }}
+            onDragLeave={() => setRectoDrag(false)}
+            onDrop={(e) => { e.preventDefault(); setRectoDrag(false); if (e.dataTransfer.files.length) { setRectoFile(e.dataTransfer.files[0] ?? null); setState({ status: 'idle' }); } }}
+            onClick={() => rectoInputRef.current?.click()}
+            inputRef={rectoInputRef}
+          />
+        )
+      )}
+
+      {/* Verso tip */}
+      {!isSuccess && showVerso && (
+        <p className="text-xs text-muted-foreground -mt-1">
+          Back side is optional but adds occupation and additional fields.
+        </p>
       )}
 
       {/* Error banner */}
@@ -289,7 +348,7 @@ export function IdUploadStep({ onSuccess }: IdUploadStepProps) {
         <div className="flex gap-2">
           <Button
             onClick={handleUpload}
-            disabled={!file || isUploading}
+            disabled={!rectoFile || isUploading}
             className="flex-1"
           >
             {isUploading ? (
@@ -301,7 +360,7 @@ export function IdUploadStep({ onSuccess }: IdUploadStepProps) {
               'Extract document data'
             )}
           </Button>
-          {file && !isUploading && (
+          {(rectoFile ?? versoFile) && !isUploading && (
             <Button variant="outline" onClick={reset}>
               Clear
             </Button>
@@ -346,6 +405,18 @@ export function IdUploadStep({ onSuccess }: IdUploadStepProps) {
               <FieldRow label="Gender" value={state.result.extracted.gender} />
               <FieldRow label="Date of birth" value={state.result.extracted.date_of_birth} />
               <FieldRow label="Expiry date" value={state.result.extracted.expiry_date} />
+              {state.result.extracted.place_of_birth && (
+                <FieldRow label="Place of birth" value={state.result.extracted.place_of_birth} />
+              )}
+              {state.result.extracted.occupation && (
+                <FieldRow label="Occupation" value={state.result.extracted.occupation} />
+              )}
+              {state.result.extracted.father_name && (
+                <FieldRow label="Father's name" value={state.result.extracted.father_name} />
+              )}
+              {state.result.extracted.mother_name && (
+                <FieldRow label="Mother's name" value={state.result.extracted.mother_name} />
+              )}
               <div className="col-span-2">
                 <FieldRow label="Address" value={state.result.extracted.address} />
               </div>

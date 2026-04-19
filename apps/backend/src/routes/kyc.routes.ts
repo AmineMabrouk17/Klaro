@@ -12,7 +12,7 @@ kycRouter.use(requireAuth);
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB per file
   fileFilter: (_req, file, cb) => {
     if (!file.mimetype.startsWith('image/')) {
       cb(new HttpError(400, 'invalid_file_type', 'Only image files are accepted.'));
@@ -22,15 +22,24 @@ const upload = multer({
   },
 });
 
+const uploadFields = upload.fields([
+  { name: 'image', maxCount: 1 },
+  { name: 'image_verso', maxCount: 1 },
+]);
+
 const ALLOWED_DOC_TYPES = new Set(['cin', 'passport', 'driver_license']);
 
 kycRouter.get('/status', (req, res) => {
   res.json({ userId: req.user!.id, status: 'pending' });
 });
 
-kycRouter.post('/upload', upload.single('image'), async (req, res, next) => {
+kycRouter.post('/upload', uploadFields, async (req, res, next) => {
   try {
-    if (!req.file) {
+    const files = req.files as Record<string, Express.Multer.File[]> | undefined;
+    const recto = files?.['image']?.[0];
+    const verso = files?.['image_verso']?.[0];
+
+    if (!recto) {
       throw new HttpError(400, 'missing_file', 'An image file is required.');
     }
 
@@ -39,7 +48,12 @@ kycRouter.post('/upload', upload.single('image'), async (req, res, next) => {
       throw new HttpError(400, 'invalid_document_type', `document_type must be one of: ${[...ALLOWED_DOC_TYPES].join(', ')}.`);
     }
 
-    const result = await ml.ocrExtract(req.file.buffer, req.file.mimetype, documentType);
+    const result = await ml.ocrExtract(
+      recto.buffer,
+      recto.mimetype,
+      documentType,
+      verso ? { buffer: verso.buffer, mimeType: verso.mimetype } : undefined,
+    );
     res.json(result);
   } catch (err) {
     next(err);

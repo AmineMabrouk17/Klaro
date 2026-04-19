@@ -42,6 +42,10 @@ class ExtractedFields(BaseModel):
     expiry_date: str | None = None
     address: str | None = None
     gender: str | None = None
+    occupation: str | None = None
+    father_name: str | None = None
+    mother_name: str | None = None
+    place_of_birth: str | None = None
 
 
 class OcrSuccessResponse(BaseModel):
@@ -70,20 +74,27 @@ QUALITY_THRESHOLD = 0.25
     summary="Extract KYC fields from an identity document image",
 )
 async def extract(
-    image: Annotated[UploadFile, File(description="Identity document image (JPEG or PNG)")],
+    image: Annotated[UploadFile, File(description="Identity document image — front side (JPEG or PNG)")],
     document_type: Annotated[
         DocumentType,
         Form(description="Type of document: cin | passport | driver_license"),
     ] = "cin",
+    image_verso: Annotated[
+        UploadFile | None,
+        File(description="Optional back side of the document (CIN / driver licence)"),
+    ] = None,
 ) -> OcrSuccessResponse | OcrErrorResponse:
     settings = get_settings()
     image_bytes = await image.read()
+    verso_bytes: bytes | None = await image_verso.read() if image_verso else None
 
     try:
         # ── 0. EXIF orientation correction ────────────────────────────
         image_bytes = auto_rotate_image(image_bytes)
+        if verso_bytes:
+            verso_bytes = auto_rotate_image(verso_bytes)
 
-        # ── 1. Quality + skew gate ────────────────────────────────────
+        # ── 1. Quality + skew gate (recto only) ───────────────────────
         quality_score = compute_quality_score(image_bytes)
         logger.info("quality_score=%.3f document_type=%s", quality_score, document_type)
 
@@ -91,13 +102,14 @@ async def extract(
             reason = "tilted_image" if quality_score == 0.0 else "low_quality"
             return OcrErrorResponse(success=False, reason=reason)
 
-        # ── 2. Claude Vision extraction ───────────────────────────────
+        # ── 2. Claude Vision extraction (recto + optional verso) ──────
         fields_dict, confidence = extract_fields_via_vision(
-            image_bytes, document_type, settings, quality_score
+            image_bytes, document_type, settings, quality_score,
+            verso_bytes=verso_bytes,
         )
-        logger.info("vision confidence=%.3f", confidence)
+        logger.info("vision confidence=%.3f verso=%s", confidence, verso_bytes is not None)
 
-        # ── 3. MTCNN face detection ───────────────────────────────────
+        # ── 3. MTCNN face detection (recto only) ──────────────────────
         face_crop_b64 = detect_and_crop_face(image_bytes)
         if face_crop_b64 is None:
             return OcrErrorResponse(success=False, reason="no_face_detected")

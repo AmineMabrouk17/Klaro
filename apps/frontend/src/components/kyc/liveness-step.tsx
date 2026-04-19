@@ -80,12 +80,12 @@ interface ClientSignals {
 
 // ── Frame capture (mirrored, jpeg) ────────────────────────────────────────────
 
-function captureFrame(video: HTMLVideoElement, canvas: HTMLCanvasElement): string {
+function captureFrame(video: HTMLVideoElement, canvas: HTMLCanvasElement, quality = 0.6): string {
   const ctx = canvas.getContext('2d')!;
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
   ctx.save(); ctx.scale(-1, 1); ctx.drawImage(video, -canvas.width, 0); ctx.restore();
-  return canvas.toDataURL('image/jpeg', 0.6).split(',')[1]!;
+  return canvas.toDataURL('image/jpeg', quality).split(',')[1]!;
 }
 
 // ── Yaw extraction from facial transformation matrix ─────────────────────────
@@ -633,8 +633,20 @@ export function LivenessStep() {
     const frames = all.length >= 3
       ? [all[0]!, all[Math.floor(all.length / 2)]!, all[all.length - 1]!]
       : [...all];
-    const selfie = all[Math.floor(all.length / 2)] ?? all[0];
-    if (selfie) sessionStorage.setItem(KYC_SELFIE_KEY, selfie);
+
+    // Selfie for face-match is ideally captured at the end of the first
+    // "Look straight" step (in runStep's finish()). Only write here as a
+    // fallback in case that capture didn't fire.
+    if (!sessionStorage.getItem(KYC_SELFIE_KEY)) {
+      const video  = videoRef.current;
+      const canvas = canvasRef.current;
+      if (video && canvas && video.readyState >= 2) {
+        sessionStorage.setItem(KYC_SELFIE_KEY, captureFrame(video, canvas, 0.88));
+      } else {
+        const selfie = all[all.length - 1] ?? all[0];
+        if (selfie) sessionStorage.setItem(KYC_SELFIE_KEY, selfie);
+      }
+    }
 
     try {
       const result = await api.post<LivenessResult>('/api/kyc/verify-liveness', {
@@ -689,6 +701,18 @@ export function LivenessStep() {
     const finish = () => {
       if (stepRunnerRef.current) clearInterval(stepRunnerRef.current);
       setShowMoveHint(false);
+
+      // Capture the face-match selfie at the END of the first "Look straight"
+      // step — this is the single best moment in the entire flow: the user has
+      // been looking directly at the camera, head centred, accessories cleared.
+      if (inst.kind === 'straight' && index === 0) {
+        const vid = videoRef.current;
+        const cvs = canvasRef.current;
+        if (vid && cvs && vid.readyState >= 2) {
+          const selfie = captureFrame(vid, cvs, 0.92);
+          sessionStorage.setItem(KYC_SELFIE_KEY, selfie);
+        }
+      }
 
       if (VISIBLE_STEP_IDS.includes(inst.id)) {
         setDoneIds((prev) => {
@@ -824,6 +848,8 @@ export function LivenessStep() {
     setGlassesHint(false);
     setHeadphonesHint(false);
     accessoryFreeRef.current = true;
+    // Clear any selfie from a previous attempt so it's always re-captured fresh
+    sessionStorage.removeItem(KYC_SELFIE_KEY);
     signalsRef.current = {
       blink_detected: false,
       yaw_right_reached: false,

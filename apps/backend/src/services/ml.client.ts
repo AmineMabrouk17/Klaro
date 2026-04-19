@@ -21,6 +21,10 @@ export interface OcrExtractedFields {
   expiry_date: string | null;
   address: string | null;
   gender: string | null;
+  occupation: string | null;
+  father_name: string | null;
+  mother_name: string | null;
+  place_of_birth: string | null;
 }
 
 export type OcrExtractResult =
@@ -80,10 +84,18 @@ async function callMultipart<T>(path: string, form: FormData): Promise<T> {
 export const ml = {
   health: () => call<{ status: string }>('/health'),
   score: (input: MLScoreInput) => call<MLScoreResult>('/score', input),
-  ocrExtract: (imageBuffer: Buffer, mimeType: string, documentType: string) => {
+  ocrExtract: (
+    imageBuffer: Buffer,
+    mimeType: string,
+    documentType: string,
+    verso?: { buffer: Buffer; mimeType: string },
+  ) => {
     const form = new FormData();
     form.append('image', new Blob([imageBuffer], { type: mimeType }), 'document');
     form.append('document_type', documentType);
+    if (verso) {
+      form.append('image_verso', new Blob([verso.buffer], { type: verso.mimeType }), 'document_verso');
+    }
     return callMultipart<OcrExtractResult>('/ocr/extract', form);
   },
   verifyLiveness: (frames: string[], clientSignals?: ClientLivenessSignals) =>
