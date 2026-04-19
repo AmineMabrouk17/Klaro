@@ -2,7 +2,15 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import type { Database } from '@klaro/shared';
 import { NextResponse, type NextRequest } from 'next/server';
 
-const PUBLIC_PATHS = ['/', '/login', '/register', '/verify-email', '/api/auth/callback'];
+const PUBLIC_PATHS = [
+  '/',
+  '/login',
+  '/register',
+  '/bank/login',
+  '/bank/register',
+  '/verify-email',
+  '/api/auth/callback',
+];
 
 // Paths that are part of the onboarding flow — don't gate them
 const ONBOARDING_PATHS = ['/kyc', '/onboarding', '/connect-bank', '/documents'];
@@ -48,12 +56,20 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Authenticated bank user landing on bank/login → go straight to portal
+  if (user && pathname === '/bank/login') {
+    const role = (user.app_metadata?.role as string | undefined) ?? 'user';
+    const url = request.nextUrl.clone();
+    url.pathname = role === 'bank' || role === 'admin' ? '/bank' : '/login';
+    return NextResponse.redirect(url);
+  }
+
   // Authenticated on login/register → redirect to app
   if (user && (pathname === '/login' || pathname === '/register')) {
     const url = request.nextUrl.clone();
     const role = (user.app_metadata?.role as string | undefined) ?? 'user';
     if (role === 'bank') {
-      url.pathname = '/bank/clients';
+      url.pathname = '/bank';
       return NextResponse.redirect(url);
     }
     // Check onboarding progress via profile
@@ -72,8 +88,9 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Bank role guard
-  if (user && pathname.startsWith(BANK_PREFIX)) {
+  // Bank role guard (skip public bank auth pages)
+  const bankPublicPaths = ['/bank/login', '/bank/register'];
+  if (user && pathname.startsWith(BANK_PREFIX) && !bankPublicPaths.includes(pathname)) {
     const role = (user.app_metadata?.role as string | undefined) ?? 'user';
     if (role !== 'bank' && role !== 'admin') {
       const url = request.nextUrl.clone();

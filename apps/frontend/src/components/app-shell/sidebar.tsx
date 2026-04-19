@@ -11,6 +11,7 @@ const items = [
   { href: '/transactions', emoji: '💳', label: 'Transactions' },
   { href: '/documents',    emoji: '📄', label: 'Documents' },
   { href: '/chat',         emoji: '🤖', label: 'Advisor' },
+  { href: '/consent',      emoji: '🔏', label: 'Consent' },
 ];
 
 export function Sidebar() {

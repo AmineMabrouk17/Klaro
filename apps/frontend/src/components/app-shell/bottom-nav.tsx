@@ -6,9 +6,9 @@ import { cn } from '@klaro/ui/cn';
 
 const items = [
   { href: '/dashboard',    emoji: '🏠', label: 'Home' },
-  { href: '/kyc',          emoji: '🪪', label: 'KYC' },
   { href: '/connect-bank', emoji: '🏦', label: 'Bank' },
   { href: '/documents',    emoji: '📄', label: 'Docs' },
+  { href: '/consent',      emoji: '🔏', label: 'Consent' },
   { href: '/chat',         emoji: '🤖', label: 'Advisor' },
 ];
 
