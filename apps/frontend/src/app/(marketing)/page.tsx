@@ -25,7 +25,7 @@ function StatsBar() {
   const stats = [
     { kind: 'static' as const, value: '3 min', label: 'To your first score' },
     { kind: 'static' as const, value: 'Free', label: 'Cost to start' },
-    { kind: 'count' as const, to: 1000, label: 'Score scale' },
+    { kind: 'count' as const, to: 1000, label: 'Score scale', suffix: undefined },
     { kind: 'static' as const, value: 'Yours', label: 'Who owns the data' },
   ];
   return (
