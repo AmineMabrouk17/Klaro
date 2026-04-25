@@ -49,15 +49,17 @@ services:
         sync: false
 
   # ML Sidecar Service (Python/FastAPI) - Private Service
-  # Internal-only service for credit scoring, KYC, OCR, and document analysis
-  # Not accessible from the internet, only from klaro-backend
+  # Use Docker (not native `runtime: python`): PaddlePaddle has no wheels for Linux
+  # ARM64, which Render’s Python build often uses — `pip install` then fails with
+  # "No matching distribution found for paddlepaddle". The image is linux/amd64; see
+  # infra/docker/ml.Dockerfile.
   - type: pserv
     name: klaro-ml
-    runtime: python
+    runtime: docker
     plan: starter
     region: oregon  # Should match backend region for low latency
-    buildCommand: cd apps/ml && pip install -e ".[ml,kyc,statements]"
-    startCommand: cd apps/ml && uvicorn klaro_ml.main:app --host 0.0.0.0 --port 8000
+    dockerfilePath: ./infra/docker/ml.Dockerfile
+    dockerContext: ./
     envVars:
       - key: ML_ENV
         value: production

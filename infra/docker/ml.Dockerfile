@@ -1,5 +1,8 @@
 # syntax=docker/dockerfile:1.7
-FROM python:3.11-slim AS base
+# linux/amd64: PaddlePaddle only ships manylinux x86_64 wheels on PyPI — Render’s
+# native Python service can be ARM (Graviton), where `pip install paddlepaddle` finds
+# zero wheels. Building as amd64 matches those wheels.
+FROM --platform=linux/amd64 python:3.11-slim AS base
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_SYSTEM_PYTHON=1 \
@@ -12,8 +15,9 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 FROM base AS builder
 WORKDIR /app
 COPY apps/ml/pyproject.toml apps/ml/uv.lock* ./
-# Install full extras for production image (KYC + ML).
-RUN uv sync --frozen --no-dev --extra ml --extra kyc || uv sync --no-dev --extra ml --extra kyc
+# Full stack: scoring (ml), ID OCR / liveness (kyc), bank statements (statements).
+RUN uv sync --frozen --no-dev --extra ml --extra kyc --extra statements \
+    || uv sync --no-dev --extra ml --extra kyc --extra statements
 
 FROM base AS runner
 WORKDIR /app

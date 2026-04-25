@@ -89,6 +89,7 @@ curl https://klaro-backend-xxx.onrender.com/health
 | Issue | Solution |
 |-------|----------|
 | Build fails | Check `render.yaml` syntax; backend must build with **pnpm from repo root** (not `npm` in `apps/backend` — `workspace:*` needs the monorepo install) |
+| `paddlepaddle` / “from versions: none” on ML | Use **Docker** for ML (`infra/docker/ml.Dockerfile`, context `.`) — not native `runtime: python` + `pip` on Render ARM. |
 | ML service OOM | Upgrade to Starter plan (512MB) or reduce dependencies |
 | Cold starts | Normal on free tier; upgrade or add cron job to keep warm |
 | Backend can't reach ML | Verify `ML_BASE_URL` is auto-set; check both services in same region |

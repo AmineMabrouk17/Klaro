@@ -288,9 +288,8 @@ If you prefer manual service creation:
 - **Environment Variables:** Set `ML_BASE_URL=http://klaro-ml:8000` (internal Render URL)
 
 **ML Service:**
-- **Runtime:** Python 3.11
-- **Build Command:** `cd apps/ml && pip install -e ".[ml,kyc,statements]"`
-- **Start Command:** `cd apps/ml && uvicorn klaro_ml.main:app --host 0.0.0.0 --port 8000`
+- **Runtime:** Docker (required — PaddleOCR / PaddlePaddle have no PyPI wheels for Linux ARM; Render’s native “Python” build often uses ARM)
+- **Dockerfile:** `infra/docker/ml.Dockerfile` — **Context:** repository root
 - **Type:** Private Service
 
 ### Alternative Platforms

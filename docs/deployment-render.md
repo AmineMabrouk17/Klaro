@@ -156,21 +156,20 @@ If you prefer creating services manually:
 ### ML Service
 
 1. **New Private Service**
-2. **Runtime:** Python 3.11
-3. **Build Command:**
-   ```bash
-   cd apps/ml && pip install -e ".[ml,kyc,statements]"
-   ```
-4. **Start Command:**
-   ```bash
-   cd apps/ml && uvicorn klaro_ml.main:app --host 0.0.0.0 --port 8000
-   ```
-5. **Environment Variables:**
+2. **Runtime:** Docker (do **not** use Render’s “Python” runtime for this app if you need PaddleOCR: **PaddlePaddle only publishes `manylinux1_x86_64` wheels** on PyPI, so on Linux ARM, `pip install paddlepaddle` fails with “from versions: none”. The provided image targets **linux/amd64**.)
+3. **Dockerfile path:** `infra/docker/ml.Dockerfile`
+4. **Docker build context:** repository root (`.`). Render must clone the full monorepo so `COPY apps/ml/...` in the Dockerfile works.
+5. **Start command:** (leave default — the image `CMD` runs `uvicorn`.)
+6. **Environment Variables:**
    - `ML_ENV=production`
    - `ML_PORT=8000`
    - Plus all secrets from Step 4 above
 
 ## Troubleshooting
+
+### `No matching distribution found for paddlepaddle` (or “from versions: none”)
+
+This happens on **ARM64** hosts when installing from PyPI: PaddlePaddle’s Linux wheel is **x86_64 only**. **Fix:** deploy the ML service with **Docker** using `infra/docker/ml.Dockerfile` (it uses `FROM --platform=linux/amd64` and `uv sync` with `ml` + `kyc` + `statements` extras), as in the root `render.yaml`. Do not use `runtime: python` + `pip install` on Render for the full KYC stack unless you are certain the build runs on `amd64`.
 
 ### Cold Starts
 
