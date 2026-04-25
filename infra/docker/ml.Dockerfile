@@ -14,7 +14,11 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
 FROM base AS builder
 WORKDIR /app
+# pyproject has readme = "README.md" and [tool.hatch] packages = ["src/klaro_ml"] —
+# hatchling must see those paths for the editable install (uv sync).
 COPY apps/ml/pyproject.toml apps/ml/uv.lock* ./
+COPY apps/ml/README.md ./
+COPY apps/ml/src ./src
 # Full stack: scoring (ml), ID OCR / liveness (kyc), bank statements (statements).
 RUN uv sync --frozen --no-dev --extra ml --extra kyc --extra statements \
     || uv sync --no-dev --extra ml --extra kyc --extra statements
