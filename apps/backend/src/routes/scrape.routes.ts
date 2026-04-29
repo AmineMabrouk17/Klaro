@@ -64,7 +64,3 @@ scrapeRouter.post('/otp/:jobId', validate(otpSubmitSchema), (req, res) => {
   }
   res.json({ jobId, status: 'running' });
 });
-
-scrapeRouter.post('/cancel/:jobId', (req, res) => {
-  res.json({ jobId: req.params.jobId, status: 'cancelled' });
-});

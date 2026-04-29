@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { cn } from '@klaro/ui/cn';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
+import { API_ENDPOINTS } from '@klaro/shared';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -649,7 +650,7 @@ export function LivenessStep() {
     }
 
     try {
-      const result = await api.post<LivenessResult>('/api/kyc/verify-liveness', {
+      const result = await api.post<LivenessResult>(API_ENDPOINTS.kyc.verifyLiveness, {
         frames,
         client_signals: signalsRef.current,
       });

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { cn } from '@klaro/ui/cn';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
+import { API_ENDPOINTS } from '@klaro/shared';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -181,7 +182,7 @@ export function ResultStep() {
     }
 
     try {
-      const result = await api.post<FaceMatchResult>('/api/kyc/face-match', {
+      const result = await api.post<FaceMatchResult>(API_ENDPOINTS.kyc.faceMatch, {
         selfie_base64: selfie,
         doc_face_base64: docFace,
         ...(docId ? { doc_id: docId } : {}),

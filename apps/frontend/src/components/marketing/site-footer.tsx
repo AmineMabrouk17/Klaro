@@ -23,7 +23,7 @@ export function SiteFooter() {
             { href: '/', label: 'For Users' },
             { href: '/partners', label: 'For Banks' },
             { href: '/#how', label: 'How it works' },
-            { href: '/#api', label: 'API' },
+            { href: '/partners#api', label: 'API' },
           ]}
         />
 

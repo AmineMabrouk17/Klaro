@@ -72,7 +72,7 @@ export function PartnerHero() {
               </motion.a>
               <motion.div whileHover={{ y: -2 }} whileTap={{ y: 0 }}>
                 <Link
-                  href="/#api"
+                  href="/partners#api"
                   className="btn-mark-ghost inline-flex items-center gap-2 px-5 py-3 text-[14px] font-medium"
                 >
                   View API reference

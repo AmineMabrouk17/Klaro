@@ -3,19 +3,18 @@ export const API_ENDPOINTS = {
 
   auth: {
     me: '/api/auth/me',
-    logout: '/api/auth/logout',
   },
 
   kyc: {
     upload: '/api/kyc/upload',
-    verify: '/api/kyc/verify',
     status: '/api/kyc/status',
+    verifyLiveness: '/api/kyc/verify-liveness',
+    faceMatch: '/api/kyc/face-match',
   },
 
   scrape: {
     start: '/api/scrape/start',
     status: (jobId: string) => `/api/scrape/status/${jobId}`,
-    cancel: (jobId: string) => `/api/scrape/cancel/${jobId}`,
     submitOtp: (jobId: string) => `/api/scrape/otp/${jobId}`,
   },
 

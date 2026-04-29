@@ -29,7 +29,7 @@ const ENDPOINTS: {
           curl -sX GET https://api.klaro.tn/v1/score/klr_7421 \
         </TerminalPrompt>
         {'\n'}
-        {'     '}-H {'"'}Authorization: Bearer $KLARO_BANK_KEY{'"'}
+        {'     '}-H {'"'}X-API-Key: klaro_live_xxxxxxxxxxxxxxxxxxxx{'"'}
         {'\n\n'}
         {'{'}
         {'\n'}
@@ -62,7 +62,7 @@ const ENDPOINTS: {
           curl -sX POST https://api.klaro.tn/v1/score/batch \
         </TerminalPrompt>
         {'\n'}
-        {'     '}-H {'"'}Authorization: Bearer $KLARO_BANK_KEY{'"'} \{'\n'}
+        {'     '}-H {'"'}X-API-Key: klaro_live_xxxxxxxxxxxxxxxxxxxx{'"'} \{'\n'}
         {'     '}-H {'"'}Content-Type: application/json{'"'} \{'\n'}
         {'     '}-d {'\''}{'{'} <TerminalKey>&quot;user_ids&quot;</TerminalKey>: [<TerminalString>&quot;klr_7421&quot;</TerminalString>, <TerminalString>&quot;klr_7409&quot;</TerminalString>] {'}'}{'\''}
         {'\n\n'}
@@ -104,7 +104,7 @@ const ENDPOINTS: {
           curl -sX GET https://api.klaro.tn/v1/users/klr_7421/habits \
         </TerminalPrompt>
         {'\n'}
-        {'     '}-H {'"'}Authorization: Bearer $KLARO_BANK_KEY{'"'}
+        {'     '}-H {'"'}X-API-Key: klaro_live_xxxxxxxxxxxxxxxxxxxx{'"'}
         {'\n\n'}
         {'{'}
         {'\n'}
@@ -131,7 +131,7 @@ const ENDPOINTS: {
           curl -sX POST https://api.klaro.tn/v1/webhooks \
         </TerminalPrompt>
         {'\n'}
-        {'     '}-H {'"'}Authorization: Bearer $KLARO_BANK_KEY{'"'} \{'\n'}
+        {'     '}-H {'"'}X-API-Key: klaro_live_xxxxxxxxxxxxxxxxxxxx{'"'} \{'\n'}
         {'     '}-H {'"'}Content-Type: application/json{'"'} \{'\n'}
         {'     '}-d {'\''}{'{'} <TerminalKey>&quot;url&quot;</TerminalKey>: <TerminalString>&quot;https://bank.tn/hooks/klaro&quot;</TerminalString>,{' '}
         <TerminalKey>&quot;events&quot;</TerminalKey>: [<TerminalString>&quot;score.changed&quot;</TerminalString>] {'}'}{'\''}
@@ -159,7 +159,7 @@ const ENDPOINTS: {
           curl -sX GET https://api.klaro.tn/v1/usage \
         </TerminalPrompt>
         {'\n'}
-        {'     '}-H {'"'}Authorization: Bearer $KLARO_BANK_KEY{'"'}
+        {'     '}-H {'"'}X-API-Key: klaro_live_xxxxxxxxxxxxxxxxxxxx{'"'}
         {'\n\n'}
         {'{'}
         {'\n'}

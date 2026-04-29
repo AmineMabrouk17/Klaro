@@ -9,7 +9,6 @@ const PUBLIC_PATHS = [
   '/register',
   '/bank/login',
   '/bank/register',
-  '/verify-email',
   '/api/auth/callback',
 ];
 
