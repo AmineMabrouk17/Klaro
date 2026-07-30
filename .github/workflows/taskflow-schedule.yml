@@ -1,0 +1,89 @@
+name: TaskFlow schedule
+
+on:
+  schedule:
+    # Weekly to start — arbitrary "every N days" isn't a single cron expression.
+    # Adjust the day/time, or add a modulo-day guard in a script step if you
+    # genuinely need a non-weekly cadence.
+    - cron: "0 9 * * 1" # Monday 09:00 UTC
+  workflow_dispatch: {}
+
+jobs:
+  plan-and-apply:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.TASKFLOW_PROJECTS_TOKEN }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      - name: Checkout taskflow runner
+        uses: actions/checkout@v4
+        with:
+          repository: invictusdhahri/taskflow
+          ref: main
+          path: .taskflow-runner
+
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: .taskflow-runner/runner/package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: .taskflow-runner/runner/pnpm-lock.yaml
+
+      - name: Install runner deps
+        working-directory: .taskflow-runner/runner
+        run: pnpm install --frozen-lockfile --ignore-workspace
+
+      - name: Restore findings cache
+        uses: actions/cache@v4
+        with:
+          path: .taskflow-runner/runner/results/cache
+          key: taskflow-cache-${{ github.repository }}-${{ github.run_id }}
+          restore-keys: |
+            taskflow-cache-${{ github.repository }}-
+
+      - name: Plan (read-only snapshot + propose-only plan)
+        id: plan
+        working-directory: .taskflow-runner/runner
+        run: |
+          set -o pipefail
+          pnpm plan -- --repo ${{ github.repository }} --id ci-${{ github.run_id }} --skip-if-unchanged | tee plan.log
+          if grep -q '^SKIPPED=true$' plan.log; then
+            echo "skipped=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skipped=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Apply (create issues, gate Ready/Backlog)
+        if: steps.plan.outputs.skipped != 'true'
+        working-directory: .taskflow-runner/runner
+        run: pnpm apply -- --plan results/plans/ci-${{ github.run_id }}.json
+
+      - name: Job summary
+        if: always()
+        working-directory: .taskflow-runner/runner
+        run: |
+          latest=$(ls -t results/runs/apply_*.json 2>/dev/null | head -n 1)
+          if [ -n "$latest" ]; then
+            {
+              echo "### TaskFlow apply summary"
+              echo '```json'
+              cat "$latest"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload plan + apply report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: taskflow-run-${{ github.run_id }}
+          path: |
+            .taskflow-runner/runner/results/plans/*.json
+            .taskflow-runner/runner/results/runs/*.json
+          retention-days: 30
